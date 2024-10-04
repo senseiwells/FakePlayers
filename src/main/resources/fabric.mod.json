@@ -1,0 +1,33 @@
+{
+  "schemaVersion": 1,
+  "id": "fake-players",
+  "version": "${version}",
+  "name": "Fake Players Mod",
+  "description": "Modern implementation of the fake players implemented originally in Carpet Mod.",
+  "authors": [
+    "Sensei"
+  ],
+  "contact": {
+    "homepage": "https://github.com/senseiwells/FakePlayers"
+  },
+  "license": "MIT",
+  "environment": "*",
+  "entrypoints": {
+    "main": [
+      {
+        "adapter": "kotlin",
+        "value": "me.senseiwells.players.FakePlayers"
+      }
+    ]
+  },
+  "mixins": [
+    "fake-players.mixins.json"
+  ],
+  "depends": {
+    "fabricloader": ">=0.14.12",
+    "fabric-api": "*",
+    "minecraft": "1.21.x",
+    "java": ">=21",
+    "fabric-language-kotlin": ">=1.9.0+kotlin.1.8.0"
+  }
+}

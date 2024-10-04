@@ -1,0 +1,8 @@
+.idea/
+.gradle/
+
+build/
+run/
+
+*.psd
+/.kotlin/

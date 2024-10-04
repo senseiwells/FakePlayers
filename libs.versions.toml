@@ -1,0 +1,26 @@
+[versions]
+fabric-loom          = "1.7-SNAPSHOT"
+mod-publish          = "0.7.0"
+kotlin-serialization = "1.9.21"
+minecraft            = "1.21.1"
+fabric-loader        = "0.16.5"
+parchment            = "1.21:2024.07.28"
+fabric-api           = "0.103.0+1.21.1"
+fabric-kotlin        = "1.11.0+kotlin.2.0.0"
+permissions          = "0.3.1"
+arcade               = "0.3.0-alpha.19+1.21.1"
+
+[libraries]
+minecraft        = { module = "com.mojang:minecraft"                              , version.ref = "minecraft" }
+fabric-loader    = { module = "net.fabricmc:fabric-loader"                        , version.ref = "fabric-loader" }
+fabric-api       = { module = "net.fabricmc.fabric-api:fabric-api"                , version.ref = "fabric-api" }
+fabric-kotlin    = { module = "net.fabricmc:fabric-language-kotlin"               , version.ref = "fabric-kotlin" }
+permissions      = { module = "me.lucko:fabric-permissions-api"                   , version.ref = "permissions" }
+arcade-commands  = { module = "net.casual-championships:arcade-commands"          , version.ref = "arcade" }
+arcade-events    = { module = "net.casual-championships:arcade-events"            , version.ref = "arcade" }
+arcade-utils     = { module = "net.casual-championships:arcade-utils"             , version.ref = "arcade" }
+
+[plugins]
+fabric-loom          = { id = "fabric-loom", version.ref = "fabric-loom" }
+kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin-serialization" }
+mod-publish          = { id = "me.modmuss50.mod-publish-plugin", version.ref = "mod-publish" }
