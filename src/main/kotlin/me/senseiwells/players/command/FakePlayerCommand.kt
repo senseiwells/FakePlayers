@@ -7,10 +7,7 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder
 import com.mojang.brigadier.context.CommandContext
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType
 import me.senseiwells.players.FakePlayer
-import me.senseiwells.players.action.ActionModifier
-import me.senseiwells.players.action.AttackAction
-import me.senseiwells.players.action.DelayAction
-import me.senseiwells.players.action.UseAction
+import me.senseiwells.players.action.*
 import net.casual.arcade.commands.*
 import net.casual.arcade.commands.arguments.EnumArgument
 import net.casual.arcade.utils.MathUtils.component1
@@ -19,6 +16,7 @@ import net.casual.arcade.utils.MathUtils.component3
 import net.casual.arcade.utils.TimeUtils.Ticks
 import net.minecraft.commands.CommandBuildContext
 import net.minecraft.commands.CommandSourceStack
+import net.minecraft.commands.SharedSuggestionProvider
 import net.minecraft.commands.arguments.DimensionArgument
 import net.minecraft.commands.arguments.GameModeArgument
 import net.minecraft.commands.arguments.TimeArgument
@@ -87,6 +85,20 @@ object FakePlayerCommand: CommandTree {
                         executes(::setUsing)
                     }
                 }
+                literal("drop") {
+                    argument("stack", BoolArgumentType.bool()) {
+                        executes(::dropItem)
+                    }
+                }
+                literal("slot") {
+                    argument("slot", IntegerArgumentType.integer(0, 8)) {
+                        suggests { _, b -> SharedSuggestionProvider.suggest((0..8).map(Int::toString), b) }
+                        executes(::swapSlot)
+                    }
+                }
+                literal("offhand") {
+                    executes(::swapOffhand)
+                }
 
                 literal("actions") {
                     literal("add") {
@@ -104,6 +116,23 @@ object FakePlayerCommand: CommandTree {
                             argument("delay", TimeArgument.time(1)) {
                                 executes(::addDelayAction)
                             }
+                        }
+                        literal("drop") {
+                            argument("stack", BoolArgumentType.bool()) {
+                                executes(::addDropAction)
+                            }
+                        }
+                        literal("jump") {
+                            executes(::addJumpAction)
+                        }
+                        literal("swap") {
+                            argument("slot", IntegerArgumentType.integer(0, 8)) {
+                                suggests { _, b -> SharedSuggestionProvider.suggest((0..8).map(Int::toString), b) }
+                                executes(::addSwapSlotAction)
+                            }
+                        }
+                        literal("offhand") {
+                            executes(::addOffhandAction)
                         }
                     }
                     literal("loop") {
@@ -195,6 +224,26 @@ object FakePlayerCommand: CommandTree {
         return context.source.success("Successfully set using to $using")
     }
 
+    private fun dropItem(context: CommandContext<CommandSourceStack>): Int {
+        val player = this.getFakePlayerOrThrow(context)
+        val dropEntireStack = BoolArgumentType.getBool(context, "stack")
+        DropAction(dropEntireStack).run(player)
+        return context.source.success("Successfully dropped items")
+    }
+
+    private fun swapSlot(context: CommandContext<CommandSourceStack>): Int {
+        val player = this.getFakePlayerOrThrow(context)
+        val slot = IntegerArgumentType.getInteger(context, "slot")
+        SwapSlotAction(slot).run(player)
+        return context.source.success("Successfully swapped to slot $slot")
+    }
+
+    private fun swapOffhand(context: CommandContext<CommandSourceStack>): Int {
+        val player = this.getFakePlayerOrThrow(context)
+        OffhandAction.run(player)
+        return context.source.success("Successfully swapped to offhand")
+    }
+
     private fun addAttackAction(context: CommandContext<CommandSourceStack>): Int {
         val player = this.getFakePlayerOrThrow(context)
         val modifier = EnumArgument.getEnumeration<ActionModifier>(context, "modifier")
@@ -214,6 +263,32 @@ object FakePlayerCommand: CommandTree {
         val delay = IntegerArgumentType.getInteger(context, "delay").Ticks
         player.actions.add(DelayAction(delay))
         return context.source.success("Successfully added delay action")
+    }
+
+    private fun addDropAction(context: CommandContext<CommandSourceStack>): Int {
+        val player = this.getFakePlayerOrThrow(context)
+        val dropEntireStack = BoolArgumentType.getBool(context, "stack")
+        player.actions.add(DropAction(dropEntireStack))
+        return context.source.success("Successfully added drop action")
+    }
+
+    private fun addJumpAction(context: CommandContext<CommandSourceStack>): Int {
+        val player = this.getFakePlayerOrThrow(context)
+        player.actions.add(JumpAction)
+        return context.source.success("Successfully added jump action")
+    }
+
+    private fun addSwapSlotAction(context: CommandContext<CommandSourceStack>): Int {
+        val player = this.getFakePlayerOrThrow(context)
+        val slot = IntegerArgumentType.getInteger(context, "slot")
+        player.actions.add(SwapSlotAction(slot))
+        return context.source.success("Successfully added swap slot action")
+    }
+
+    private fun addOffhandAction(context: CommandContext<CommandSourceStack>): Int {
+        val player = this.getFakePlayerOrThrow(context)
+        player.actions.add(OffhandAction)
+        return context.source.success("Successfully added offhand action")
     }
 
     private fun loopActions(context: CommandContext<CommandSourceStack>): Int {

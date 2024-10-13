@@ -106,7 +106,7 @@ class FakePlayerActions(
         val start = this.action
         while (true) {
             val action = this.actions.getOrNull(this.action) ?: break
-            if (!action.run(this)) {
+            if (!action.run(this.player)) {
                 break
             }
             this.action += 1

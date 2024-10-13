@@ -2,13 +2,14 @@ package me.senseiwells.players.action
 
 import com.mojang.serialization.Codec
 import com.mojang.serialization.MapCodec
+import me.senseiwells.players.FakePlayer
 import me.senseiwells.players.utils.FakePlayerRegistries
 import net.casual.arcade.utils.codec.CodecProvider.Companion.register
 import net.minecraft.core.Registry
 import java.util.function.Function
 
 interface FakePlayerAction {
-    fun run(actions: FakePlayerActions): Boolean
+    fun run(player: FakePlayer): Boolean
 
     fun codec(): MapCodec<out FakePlayerAction>
 
@@ -22,6 +23,10 @@ interface FakePlayerAction {
             AttackAction.register(registry)
             UseAction.register(registry)
             DelayAction.register(registry)
+            DropAction.register(registry)
+            OffhandAction.register(registry)
+            SwapSlotAction.register(registry)
+            JumpAction.register(registry)
         }
     }
 }

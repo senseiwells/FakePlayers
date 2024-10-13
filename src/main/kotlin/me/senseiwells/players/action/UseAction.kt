@@ -2,21 +2,22 @@ package me.senseiwells.players.action
 
 import com.mojang.serialization.MapCodec
 import com.mojang.serialization.codecs.RecordCodecBuilder
+import me.senseiwells.players.FakePlayer
 import net.casual.arcade.utils.codec.CodecProvider
 import net.minecraft.resources.ResourceLocation
 
 class UseAction(private val type: ActionModifier): FakePlayerAction {
-    override fun run(actions: FakePlayerActions): Boolean {
+    override fun run(player: FakePlayer): Boolean {
         when (this.type) {
             ActionModifier.Hold -> {
-                actions.using = true
-                actions.usingHeld = true
+                player.actions.using = true
+                player.actions.usingHeld = true
             }
             ActionModifier.Click -> {
-                actions.using = true
+                player.actions.using = true
             }
             ActionModifier.Release -> {
-                actions.usingHeld = false
+                player.actions.usingHeld = false
             }
         }
         return true

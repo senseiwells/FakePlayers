@@ -2,21 +2,22 @@ package me.senseiwells.players.action
 
 import com.mojang.serialization.MapCodec
 import com.mojang.serialization.codecs.RecordCodecBuilder
+import me.senseiwells.players.FakePlayer
 import net.casual.arcade.utils.codec.CodecProvider
 import net.minecraft.resources.ResourceLocation
 
 class AttackAction(private val type: ActionModifier): FakePlayerAction {
-    override fun run(actions: FakePlayerActions): Boolean {
+    override fun run(player: FakePlayer): Boolean {
         when (this.type) {
             ActionModifier.Hold -> {
-                actions.attacking = true
-                actions.attackingHeld = true
+                player.actions.attacking = true
+                player.actions.attackingHeld = true
             }
             ActionModifier.Click -> {
-                actions.attacking = true
+                player.actions.attacking = true
             }
             ActionModifier.Release -> {
-                actions.attackingHeld = false
+                player.actions.attackingHeld = false
             }
         }
         return true
