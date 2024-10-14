@@ -20,6 +20,7 @@ import net.minecraft.server.network.CommonListenerCookie
 import net.minecraft.world.damagesource.DamageSource
 import net.minecraft.world.level.block.state.BlockState
 import org.jetbrains.annotations.ApiStatus.Internal
+import java.util.UUID
 import java.util.concurrent.CompletableFuture
 
 class FakePlayer @Internal constructor(
@@ -82,6 +83,10 @@ class FakePlayer @Internal constructor(
         private val joining = Object2ObjectOpenHashMap<String, CompletableFuture<FakePlayer>>()
 
         fun join(server: MinecraftServer, profile: GameProfile): FakePlayer {
+            if (server.playerList.getPlayer(profile.id) != null) {
+                throw IllegalArgumentException("Player with UUID ${profile.id} already exists")
+            }
+
             val player = FakePlayer(server, server.overworld(), profile)
             player.entityData.set(DATA_PLAYER_MODE_CUSTOMISATION, 0x7F)
             val connection = FakeConnection()
@@ -103,6 +108,12 @@ class FakePlayer @Internal constructor(
                     this.join(server, resolved.gameProfile)
                 }
             }
+        }
+
+        fun join(server: MinecraftServer, uuid: UUID): CompletableFuture<FakePlayer> {
+            return ResolvableProfile(uuid).resolve().thenApplyAsync({ resolved ->
+                this.join(server, resolved.gameProfile)
+            }, server)
         }
 
         fun isJoining(username: String): Boolean {

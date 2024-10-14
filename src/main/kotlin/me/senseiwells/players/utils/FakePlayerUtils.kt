@@ -7,3 +7,7 @@ import java.util.*
 fun ResolvableProfile(name: String): ResolvableProfile {
     return ResolvableProfile(Optional.of(name), Optional.empty(), PropertyMap())
 }
+
+fun ResolvableProfile(uuid: UUID): ResolvableProfile {
+    return ResolvableProfile(Optional.empty(), Optional.of(uuid), PropertyMap())
+}
