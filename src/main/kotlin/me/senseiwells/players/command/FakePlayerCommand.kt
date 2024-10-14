@@ -2,27 +2,28 @@ package me.senseiwells.players.command
 
 import com.mojang.brigadier.Command
 import com.mojang.brigadier.arguments.BoolArgumentType
-import com.mojang.brigadier.arguments.IntegerArgumentType
 import com.mojang.brigadier.builder.LiteralArgumentBuilder
 import com.mojang.brigadier.context.CommandContext
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType
 import me.senseiwells.players.FakePlayer
-import me.senseiwells.players.action.*
+import me.senseiwells.players.action.FakePlayerAction
+import me.senseiwells.players.action.FakePlayerActionProvider
+import me.senseiwells.players.utils.FakePlayerRegistries
 import net.casual.arcade.commands.*
-import net.casual.arcade.commands.arguments.EnumArgument
+import net.casual.arcade.scheduler.GlobalTickedScheduler
 import net.casual.arcade.utils.MathUtils.component1
 import net.casual.arcade.utils.MathUtils.component2
 import net.casual.arcade.utils.MathUtils.component3
 import net.casual.arcade.utils.TimeUtils.Ticks
 import net.minecraft.commands.CommandBuildContext
 import net.minecraft.commands.CommandSourceStack
-import net.minecraft.commands.SharedSuggestionProvider
 import net.minecraft.commands.arguments.DimensionArgument
 import net.minecraft.commands.arguments.GameModeArgument
-import net.minecraft.commands.arguments.TimeArgument
 import net.minecraft.commands.arguments.coordinates.Vec2Argument
 import net.minecraft.commands.arguments.coordinates.Vec3Argument
 import net.minecraft.network.chat.Component
+import net.minecraft.server.MinecraftServer
+import net.minecraft.server.TickTask
 import net.minecraft.server.level.ServerLevel
 import net.minecraft.world.level.GameType
 import net.minecraft.world.phys.Vec2
@@ -75,82 +76,47 @@ object FakePlayerCommand: CommandTree {
                     executes(::fakePlayerLeave)
                 }
 
-                literal("attacking") {
-                    argument("attacking", BoolArgumentType.bool()) {
-                        executes(::setAttacking)
-                    }
-                }
-                literal("using") {
-                    argument("using", BoolArgumentType.bool()) {
-                        executes(::setUsing)
-                    }
-                }
-                literal("drop") {
-                    argument("stack", BoolArgumentType.bool()) {
-                        executes(::dropItem)
-                    }
-                }
-                literal("slot") {
-                    argument("slot", IntegerArgumentType.integer(0, 8)) {
-                        suggests { _, b -> SharedSuggestionProvider.suggest((0..8).map(Int::toString), b) }
-                        executes(::swapSlot)
-                    }
-                }
-                literal("offhand") {
-                    executes(::swapOffhand)
-                }
-
                 literal("actions") {
-                    literal("add") {
-                        literal("attack") {
-                            argument("modifier", EnumArgument.enumeration<ActionModifier>()) {
-                                executes(::addAttackAction)
+                    literal("run") {
+                        for (provider in FakePlayerRegistries.ACTION_PROVIDERS) {
+                            if (provider.canRunAction) {
+                                literal(provider.ID.toString()) {
+                                    provider.addCommandArguments(this) { context ->
+                                        runAction(context, provider)
+                                    }
+                                }
                             }
                         }
-                        literal("use") {
-                            argument("modifier", EnumArgument.enumeration<ActionModifier>()) {
-                                executes(::addUseAction)
+                    }
+                    literal("chain") {
+                        literal("add") {
+                            for (provider in FakePlayerRegistries.ACTION_PROVIDERS) {
+                                if (provider.canChainAction) {
+                                    literal(provider.ID.toString()) {
+                                        provider.addCommandArguments(this) { context ->
+                                            addAction(context, provider)
+                                        }
+                                    }
+                                }
                             }
                         }
-                        literal("delay") {
-                            argument("delay", TimeArgument.time(1)) {
-                                executes(::addDelayAction)
+                        literal("loop") {
+                            argument("loop", BoolArgumentType.bool()) {
+                                executes(::loopActions)
                             }
                         }
-                        literal("drop") {
-                            argument("stack", BoolArgumentType.bool()) {
-                                executes(::addDropAction)
-                            }
+                        literal("pause") {
+                            executes(::pauseActions)
                         }
-                        literal("jump") {
-                            executes(::addJumpAction)
+                        literal("resume") {
+                            executes(::resumeActions)
                         }
-                        literal("swap") {
-                            argument("slot", IntegerArgumentType.integer(0, 8)) {
-                                suggests { _, b -> SharedSuggestionProvider.suggest((0..8).map(Int::toString), b) }
-                                executes(::addSwapSlotAction)
-                            }
+                        literal("restart") {
+                            executes(::restartActions)
                         }
-                        literal("offhand") {
-                            executes(::addOffhandAction)
+                        literal("stop") {
+                            executes(::stopActions)
                         }
-                    }
-                    literal("loop") {
-                        argument("loop", BoolArgumentType.bool()) {
-                            executes(::loopActions)
-                        }
-                    }
-                    literal("pause") {
-                        executes(::pauseActions)
-                    }
-                    literal("resume") {
-                        executes(::resumeActions)
-                    }
-                    literal("restart") {
-                        executes(::restartActions)
-                    }
-                    literal("stop") {
-                        executes(::stopActions)
                     }
                 }
             }
@@ -208,87 +174,19 @@ object FakePlayerCommand: CommandTree {
         }
     }
 
-    private fun setAttacking(context: CommandContext<CommandSourceStack>): Int {
+    private fun runAction(context: CommandContext<CommandSourceStack>, provider: FakePlayerActionProvider): Int {
         val player = this.getFakePlayerOrThrow(context)
-        val attacking = BoolArgumentType.getBool(context, "attacking")
-        player.actions.attacking = attacking
-        player.actions.attackingHeld = attacking
-        return context.source.success("Successfully set attacking to $attacking")
+        val action = provider.createCommandAction(context)
+        val server = context.source.server
+        runActionRecursively(server, action, player)
+        return context.source.success("Successfully ran action '${provider.ID}'")
     }
 
-    private fun setUsing(context: CommandContext<CommandSourceStack>): Int {
+    private fun addAction(context: CommandContext<CommandSourceStack>, provider: FakePlayerActionProvider): Int {
         val player = this.getFakePlayerOrThrow(context)
-        val using = BoolArgumentType.getBool(context, "using")
-        player.actions.using = using
-        player.actions.usingHeld = using
-        return context.source.success("Successfully set using to $using")
-    }
-
-    private fun dropItem(context: CommandContext<CommandSourceStack>): Int {
-        val player = this.getFakePlayerOrThrow(context)
-        val dropEntireStack = BoolArgumentType.getBool(context, "stack")
-        DropAction(dropEntireStack).run(player)
-        return context.source.success("Successfully dropped items")
-    }
-
-    private fun swapSlot(context: CommandContext<CommandSourceStack>): Int {
-        val player = this.getFakePlayerOrThrow(context)
-        val slot = IntegerArgumentType.getInteger(context, "slot")
-        SwapSlotAction(slot).run(player)
-        return context.source.success("Successfully swapped to slot $slot")
-    }
-
-    private fun swapOffhand(context: CommandContext<CommandSourceStack>): Int {
-        val player = this.getFakePlayerOrThrow(context)
-        OffhandAction.run(player)
-        return context.source.success("Successfully swapped to offhand")
-    }
-
-    private fun addAttackAction(context: CommandContext<CommandSourceStack>): Int {
-        val player = this.getFakePlayerOrThrow(context)
-        val modifier = EnumArgument.getEnumeration<ActionModifier>(context, "modifier")
-        player.actions.add(AttackAction(modifier))
-        return context.source.success("Successfully added attack action")
-    }
-
-    private fun addUseAction(context: CommandContext<CommandSourceStack>): Int {
-        val player = this.getFakePlayerOrThrow(context)
-        val modifier = EnumArgument.getEnumeration<ActionModifier>(context, "modifier")
-        player.actions.add(UseAction(modifier))
-        return context.source.success("Successfully added use action")
-    }
-
-    private fun addDelayAction(context: CommandContext<CommandSourceStack>): Int {
-        val player = this.getFakePlayerOrThrow(context)
-        val delay = IntegerArgumentType.getInteger(context, "delay").Ticks
-        player.actions.add(DelayAction(delay))
-        return context.source.success("Successfully added delay action")
-    }
-
-    private fun addDropAction(context: CommandContext<CommandSourceStack>): Int {
-        val player = this.getFakePlayerOrThrow(context)
-        val dropEntireStack = BoolArgumentType.getBool(context, "stack")
-        player.actions.add(DropAction(dropEntireStack))
-        return context.source.success("Successfully added drop action")
-    }
-
-    private fun addJumpAction(context: CommandContext<CommandSourceStack>): Int {
-        val player = this.getFakePlayerOrThrow(context)
-        player.actions.add(JumpAction)
-        return context.source.success("Successfully added jump action")
-    }
-
-    private fun addSwapSlotAction(context: CommandContext<CommandSourceStack>): Int {
-        val player = this.getFakePlayerOrThrow(context)
-        val slot = IntegerArgumentType.getInteger(context, "slot")
-        player.actions.add(SwapSlotAction(slot))
-        return context.source.success("Successfully added swap slot action")
-    }
-
-    private fun addOffhandAction(context: CommandContext<CommandSourceStack>): Int {
-        val player = this.getFakePlayerOrThrow(context)
-        player.actions.add(OffhandAction)
-        return context.source.success("Successfully added offhand action")
+        val action = provider.createCommandAction(context)
+        player.actions.add(action)
+        return context.source.success("Successfully added '${provider.ID}' action")
     }
 
     private fun loopActions(context: CommandContext<CommandSourceStack>): Int {
@@ -338,5 +236,18 @@ object FakePlayerCommand: CommandTree {
             throw FAKE_PLAYERS_ONLY.create()
         }
         return player
+    }
+
+    private fun runActionRecursively(server: MinecraftServer, action: FakePlayerAction, player: FakePlayer) {
+        server.tell(TickTask(server.tickCount) {
+            if (!player.isRemoved) {
+                val result = action.run(player)
+                if (!result) {
+                    GlobalTickedScheduler.schedule(1.Ticks) {
+                        runActionRecursively(server, action, player)
+                    }
+                }
+            }
+        })
     }
 }

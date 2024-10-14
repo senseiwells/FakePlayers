@@ -1,25 +1,45 @@
 package me.senseiwells.players.action
 
 import com.mojang.serialization.Codec
-import com.mojang.serialization.MapCodec
 import me.senseiwells.players.FakePlayer
+import me.senseiwells.players.action.FakePlayerActionProvider.Companion.register
+import me.senseiwells.players.action.impl.*
 import me.senseiwells.players.utils.FakePlayerRegistries
-import net.casual.arcade.utils.codec.CodecProvider.Companion.register
 import net.minecraft.core.Registry
-import java.util.function.Function
 
+/**
+ * This interface represents an action that can be
+ * run by a fake player.
+ */
 interface FakePlayerAction {
+    /**
+     * This runs the action, this method will be called
+     * every tick until the action has finished running.
+     *
+     * This method should only return `true` after it
+     * has finished running.
+     * If this method returns `false` then the run method
+     * must be called again the next tick.
+     *
+     * @param player The player doing the action.
+     * @return Whether the action is finished.
+     */
     fun run(player: FakePlayer): Boolean
 
-    fun codec(): MapCodec<out FakePlayerAction>
+    /**
+     * The provider for the given action.
+     *
+     * @return The action provider.
+     */
+    fun provider(): FakePlayerActionProvider
 
     companion object {
         val CODEC: Codec<FakePlayerAction> by lazy {
-            FakePlayerRegistries.ACTIONS.byNameCodec()
-                .dispatch(FakePlayerAction::codec, Function.identity())
+            FakePlayerRegistries.ACTION_PROVIDERS.byNameCodec()
+                .dispatch(FakePlayerAction::provider, FakePlayerActionProvider::CODEC)
         }
 
-        internal fun bootstrap(registry: Registry<MapCodec<out FakePlayerAction>>) {
+        internal fun bootstrap(registry: Registry<FakePlayerActionProvider>) {
             AttackAction.register(registry)
             UseAction.register(registry)
             DelayAction.register(registry)

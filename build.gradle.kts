@@ -39,6 +39,7 @@ dependencies {
     include(modImplementation(libs.arcade.commands.get())!!)
 
     include(modImplementation(libs.arcade.events.get())!!)
+    include(modImplementation(libs.arcade.scheduler.get())!!)
     include(modImplementation(libs.arcade.utils.get())!!)
 }
 

@@ -7,16 +7,19 @@ import net.casual.arcade.events.GlobalEventHandler
 import net.casual.arcade.events.server.ServerLoadedEvent
 import net.casual.arcade.events.server.ServerRegisterCommandEvent
 import net.casual.arcade.events.server.ServerSaveEvent
+import net.casual.arcade.events.server.ServerStoppingEvent
 import net.fabricmc.api.ModInitializer
 import net.minecraft.nbt.CompoundTag
 import net.minecraft.nbt.ListTag
 import net.minecraft.nbt.NbtIo
+import net.minecraft.nbt.StringTag
 import net.minecraft.nbt.Tag
 import net.minecraft.server.MinecraftServer
 import net.minecraft.world.level.storage.LevelResource
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.nio.file.Path
+import java.util.*
 import kotlin.io.path.exists
 
 object FakePlayers: ModInitializer {
@@ -35,7 +38,12 @@ object FakePlayers: ModInitializer {
         GlobalEventHandler.register<ServerLoadedEvent> { (server) ->
             this.loadFakePlayers(server)
         }
-        GlobalEventHandler.register<ServerSaveEvent> { (server) ->
+        GlobalEventHandler.register<ServerSaveEvent> { (server, stopping) ->
+            if (!stopping) {
+                this.saveFakePlayers(server)
+            }
+        }
+        GlobalEventHandler.register<ServerStoppingEvent> { (server) ->
             this.saveFakePlayers(server)
         }
     }
@@ -48,14 +56,9 @@ object FakePlayers: ModInitializer {
 
         try {
             val wrapper = NbtIo.read(path) ?: return
-            val players = wrapper.getList("players", Tag.TAG_COMPOUND.toInt())
+            val players = wrapper.getList("players", Tag.TAG_STRING.toInt())
             for (data in players) {
-                data as CompoundTag
-                val uuid = data.getUUID("uuid")
-                val actions = data.getCompound("actions")
-                FakePlayer.join(server, uuid).thenApply { player ->
-                    player.actions.deserialize(actions)
-                }
+                FakePlayer.join(server, UUID.fromString(data.asString))
             }
         } catch (e: Exception) {
             logger.error("Failed to load fake players", e)
@@ -68,11 +71,7 @@ object FakePlayers: ModInitializer {
             if (player !is FakePlayer) {
                 continue
             }
-
-            val data = CompoundTag()
-            data.putUUID("uuid", player.uuid)
-            data.put("actions", player.actions.serialize())
-            players.add(data)
+            players.add(StringTag.valueOf(player.stringUUID))
         }
 
         val wrapper = CompoundTag()
