@@ -7,7 +7,9 @@ import me.senseiwells.players.network.FakeConnection
 import me.senseiwells.players.network.FakeGamePacketListenerImpl
 import me.senseiwells.players.utils.ResolvableProfile
 import net.casual.arcade.utils.contains
+import net.minecraft.Util
 import net.minecraft.core.BlockPos
+import net.minecraft.core.UUIDUtil
 import net.minecraft.nbt.CompoundTag
 import net.minecraft.nbt.Tag
 import net.minecraft.network.protocol.game.ServerboundClientCommandPacket
@@ -105,13 +107,21 @@ class FakePlayer @Internal constructor(
                         FakePlayers.logger.error("Fake player $username failed to join", throwable)
                     }
                 }, server).thenApply { resolved ->
-                    this.join(server, resolved.gameProfile)
+                    val profile = if (resolved.id.get() == Util.NIL_UUID) {
+                        GameProfile(UUIDUtil.createOfflinePlayerUUID(username), username)
+                    } else {
+                        resolved.gameProfile
+                    }
+                    this.join(server, profile)
                 }
             }
         }
 
         fun join(server: MinecraftServer, uuid: UUID): CompletableFuture<FakePlayer> {
             return ResolvableProfile(uuid).resolve().thenApplyAsync({ resolved ->
+                if (resolved.name.get().isEmpty()) {
+                    throw IllegalStateException("Resolved name was empty")
+                }
                 this.join(server, resolved.gameProfile)
             }, server)
         }

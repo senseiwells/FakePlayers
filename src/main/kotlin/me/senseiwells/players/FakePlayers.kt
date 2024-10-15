@@ -1,6 +1,10 @@
 package me.senseiwells.players
 
 import me.senseiwells.players.command.FakePlayerCommand
+import me.senseiwells.players.mixins.GameProfileCacheAccessor
+import me.senseiwells.players.mixins.MinecraftServerAccessor
+import me.senseiwells.players.mixins.ServicesAccessor
+import me.senseiwells.players.network.MineToolsGameProfileRepository
 import me.senseiwells.players.utils.FakePlayerRegistries
 import net.casual.arcade.commands.register
 import net.casual.arcade.events.GlobalEventHandler
@@ -18,6 +22,7 @@ import net.minecraft.server.MinecraftServer
 import net.minecraft.world.level.storage.LevelResource
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import java.net.Proxy
 import java.nio.file.Path
 import java.util.*
 import kotlin.io.path.exists
@@ -37,6 +42,12 @@ object FakePlayers: ModInitializer {
         }
         GlobalEventHandler.register<ServerLoadedEvent> { (server) ->
             this.loadFakePlayers(server)
+            if (this.config.useMineToolsApi) {
+                val repository = MineToolsGameProfileRepository(Proxy.NO_PROXY)
+                val services = (server as MinecraftServerAccessor).services
+                (services as ServicesAccessor).setProfileRepository(repository)
+                (services.profileCache as GameProfileCacheAccessor).setProfileRepository(repository)
+            }
         }
         GlobalEventHandler.register<ServerSaveEvent> { (server, stopping) ->
             if (!stopping) {

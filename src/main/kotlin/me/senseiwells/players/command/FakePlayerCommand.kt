@@ -6,6 +6,7 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder
 import com.mojang.brigadier.context.CommandContext
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType
 import me.senseiwells.players.FakePlayer
+import me.senseiwells.players.FakePlayers
 import me.senseiwells.players.action.FakePlayerAction
 import me.senseiwells.players.action.FakePlayerActionProvider
 import me.senseiwells.players.utils.FakePlayerRegistries
@@ -170,6 +171,7 @@ object FakePlayerCommand: CommandTree {
         return FakePlayer.join(context.source.server, username).whenComplete { _, throwable ->
             if (throwable != null) {
                 context.source.fail("Fake player $username failed to join, see logs for more info")
+                FakePlayers.logger.error("Fake player $username failed to join", throwable)
             }
         }
     }

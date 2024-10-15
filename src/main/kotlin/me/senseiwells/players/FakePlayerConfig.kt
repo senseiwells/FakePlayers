@@ -1,6 +1,8 @@
 package me.senseiwells.players
 
+import kotlinx.serialization.EncodeDefault
 import kotlinx.serialization.ExperimentalSerializationApi
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.decodeFromStream
@@ -17,7 +19,11 @@ import kotlin.io.path.outputStream
 @Serializable
 @OptIn(ExperimentalSerializationApi::class)
 class FakePlayerConfig(
-    val reloadFakePlayers: Boolean = true
+    @SerialName("reload_fake_players")
+    val reloadFakePlayers: Boolean = true,
+    @SerialName("use_mine_tools_api")
+    @EncodeDefault(EncodeDefault.Mode.NEVER)
+    val useMineToolsApi: Boolean = false
 ) {
     companion object {
         private val path: Path = FabricLoader.getInstance().configDir.resolve("fake-player-config.json")

@@ -9,6 +9,7 @@ fabric-api           = "0.103.0+1.21.1"
 fabric-kotlin        = "1.11.0+kotlin.2.0.0"
 permissions          = "0.3.1"
 arcade               = "0.3.0-alpha.27+1.21.1"
+mojank               = "1.0.2"
 
 [libraries]
 minecraft        = { module = "com.mojang:minecraft"                              , version.ref = "minecraft" }
@@ -16,6 +17,7 @@ fabric-loader    = { module = "net.fabricmc:fabric-loader"                      
 fabric-api       = { module = "net.fabricmc.fabric-api:fabric-api"                , version.ref = "fabric-api" }
 fabric-kotlin    = { module = "net.fabricmc:fabric-language-kotlin"               , version.ref = "fabric-kotlin" }
 permissions      = { module = "me.lucko:fabric-permissions-api"                   , version.ref = "permissions" }
+mojank           = { module = "me.senseiwells:mojank"                             , version.ref = "mojank" }
 arcade-commands  = { module = "net.casual-championships:arcade-commands"          , version.ref = "arcade" }
 arcade-events    = { module = "net.casual-championships:arcade-events"            , version.ref = "arcade" }
 arcade-scheduler = { module = "net.casual-championships:arcade-scheduler"         , version.ref = "arcade" }
