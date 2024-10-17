@@ -8,7 +8,7 @@ parchment            = "1.21:2024.07.28"
 fabric-api           = "0.103.0+1.21.1"
 fabric-kotlin        = "1.11.0+kotlin.2.0.0"
 permissions          = "0.3.1"
-arcade               = "0.3.0-alpha.27+1.21.1"
+arcade               = "0.3.0-alpha.30+1.21.1"
 mojank               = "1.0.2"
 
 [libraries]
