@@ -184,8 +184,8 @@ class FakePlayerActions(
                     if (!result.consumesAction()) {
                         result = this.interact(hitResult.entity, hand)
                     }
-                    if (result.consumesAction()) {
-                        if (result.shouldSwing()) {
+                    if (result is InteractionResult.Success) {
+                        if (result.swingSource == InteractionResult.SwingSource.SERVER) {
                             this.player.swing(hand)
                         }
                         return
@@ -193,8 +193,8 @@ class FakePlayerActions(
                 }
                 is BlockHitResult ->  {
                     val result = this.useItemOn(hand, hitResult)
-                    if (result.consumesAction() || result == InteractionResult.FAIL) {
-                        if (result.shouldSwing()) {
+                    if (result is InteractionResult.Success) {
+                        if (result.swingSource == InteractionResult.SwingSource.SERVER) {
                             this.player.swing(hand)
                         }
                         return
@@ -203,8 +203,8 @@ class FakePlayerActions(
                 else -> {
                     if (!stack.isEmpty) {
                         val result = this.useItem(hand)
-                        if (result.consumesAction()) {
-                            if (result.shouldSwing()) {
+                        if (result is InteractionResult.Success) {
+                            if (result.swingSource == InteractionResult.SwingSource.SERVER) {
                                 this.player.swing(hand)
                             }
                             return
@@ -342,7 +342,7 @@ class FakePlayerActions(
         val vec3 = hitResult.location
         if (!vec3.closerThan(pos, range)) {
             val vec32 = hitResult.location
-            val direction = Direction.getNearest(vec32.x - pos.x, vec32.y - pos.y, vec32.z - pos.z)
+            val direction = Direction.getApproximateNearest(vec32.x - pos.x, vec32.y - pos.y, vec32.z - pos.z)
             return BlockHitResult.miss(vec32, direction, BlockPos.containing(vec32))
         } else {
             return hitResult

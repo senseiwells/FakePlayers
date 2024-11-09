@@ -145,7 +145,7 @@ object FakePlayerCommand: CommandTree {
             if (gamemode != null) {
                 player.gameMode.changeGameModeForPlayer(gamemode)
             }
-            player.teleportTo(level, x, y, z, yRot, xRot)
+            player.teleportTo(level, x, y, z, setOf(), yRot, xRot, true)
         }
         return context.source.success("Fake player is spawning...")
     }
@@ -241,7 +241,7 @@ object FakePlayerCommand: CommandTree {
     }
 
     private fun runActionRecursively(server: MinecraftServer, action: FakePlayerAction, player: FakePlayer) {
-        server.tell(TickTask(server.tickCount) {
+        server.schedule(TickTask(server.tickCount) {
             if (!player.isRemoved) {
                 val result = action.run(player)
                 if (!result) {

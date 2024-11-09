@@ -45,7 +45,7 @@ class FakePlayer @Internal constructor(
         }
         super.tick()
 
-        this.server.tell(TickTask(this.server.tickCount) {
+        this.server.schedule(TickTask(this.server.tickCount) {
             // All player actions should be handled in the packet phase
             this.actions.tick()
         })

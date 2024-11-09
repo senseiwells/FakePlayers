@@ -4,7 +4,7 @@ plugins {
         .split("+")[0]
 
     kotlin("jvm").version(jvmVersion)
-    alias(libs.plugins.kotlin.serialization)
+    kotlin("plugin.serialization").version(jvmVersion)
     alias(libs.plugins.fabric.loom)
     alias(libs.plugins.mod.publish)
     `maven-publish`
@@ -19,7 +19,7 @@ repositories {
 }
 
 
-val modVersion = "0.1.0-beta.4"
+val modVersion = "0.1.1-beta.0"
 val releaseVersion = "${modVersion}+mc${libs.versions.minecraft.get()}"
 version = releaseVersion
 group = "me.senseiwells"
