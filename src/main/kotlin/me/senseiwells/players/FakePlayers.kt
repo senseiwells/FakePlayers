@@ -8,6 +8,7 @@ import me.senseiwells.players.network.MineToolsGameProfileRepository
 import me.senseiwells.players.utils.FakePlayerRegistries
 import net.casual.arcade.commands.register
 import net.casual.arcade.events.GlobalEventHandler
+import net.casual.arcade.events.ListenerRegistry.Companion.register
 import net.casual.arcade.events.server.ServerLoadedEvent
 import net.casual.arcade.events.server.ServerRegisterCommandEvent
 import net.casual.arcade.events.server.ServerSaveEvent
@@ -37,10 +38,10 @@ object FakePlayers: ModInitializer {
     override fun onInitialize() {
         FakePlayerRegistries.load()
 
-        GlobalEventHandler.register<ServerRegisterCommandEvent> { event ->
+        GlobalEventHandler.Server.register<ServerRegisterCommandEvent> { event ->
             event.register(FakePlayerCommand)
         }
-        GlobalEventHandler.register<ServerLoadedEvent> { (server) ->
+        GlobalEventHandler.Server.register<ServerLoadedEvent> { (server) ->
             this.loadFakePlayers(server)
             if (this.config.useMineToolsApi) {
                 val repository = MineToolsGameProfileRepository(Proxy.NO_PROXY)
@@ -49,12 +50,12 @@ object FakePlayers: ModInitializer {
                 (services.profileCache as GameProfileCacheAccessor).setProfileRepository(repository)
             }
         }
-        GlobalEventHandler.register<ServerSaveEvent> { (server, stopping) ->
+        GlobalEventHandler.Server.register<ServerSaveEvent> { (server, stopping) ->
             if (!stopping) {
                 this.saveFakePlayers(server)
             }
         }
-        GlobalEventHandler.register<ServerStoppingEvent> { (server) ->
+        GlobalEventHandler.Server.register<ServerStoppingEvent> { (server) ->
             this.saveFakePlayers(server)
         }
     }
