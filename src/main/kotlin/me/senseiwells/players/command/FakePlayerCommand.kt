@@ -53,7 +53,7 @@ object FakePlayerCommand: CommandTree {
                 literal("spawn") {
                     executes { c -> spawnFakePlayer(c, c.source.position, c.source.rotation, c.source.level, null) }
                     literal("at") {
-                        argument("pos", Vec3Argument.vec3()) {
+                        argument("position", Vec3Argument.vec3()) {
                             executes { c -> spawnFakePlayer(c, rotation = null, dimension = c.source.level, gamemode = null) }
                             literal("facing") {
                                 argument("rotation", Vec2Argument.vec2()) {

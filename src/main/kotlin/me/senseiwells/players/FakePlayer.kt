@@ -8,7 +8,6 @@ import me.senseiwells.players.network.FakeGamePacketListenerImpl
 import me.senseiwells.players.utils.ResolvableProfile
 import net.casual.arcade.utils.contains
 import net.minecraft.Util
-import net.minecraft.core.BlockPos
 import net.minecraft.core.UUIDUtil
 import net.minecraft.nbt.CompoundTag
 import net.minecraft.nbt.Tag
@@ -20,9 +19,8 @@ import net.minecraft.server.level.ServerLevel
 import net.minecraft.server.level.ServerPlayer
 import net.minecraft.server.network.CommonListenerCookie
 import net.minecraft.world.damagesource.DamageSource
-import net.minecraft.world.level.block.state.BlockState
 import org.jetbrains.annotations.ApiStatus.Internal
-import java.util.UUID
+import java.util.*
 import java.util.concurrent.CompletableFuture
 
 class FakePlayer @Internal constructor(
@@ -41,6 +39,7 @@ class FakePlayer @Internal constructor(
         // so we need to manually move the player.
         // This keeps the ticket manager updated
         if (this.server.tickCount % 10 == 0) {
+            this.connection.resetPosition()
             this.serverLevel().chunkSource.move(this)
         }
         super.tick()
@@ -57,10 +56,6 @@ class FakePlayer @Internal constructor(
         )
     }
 
-    override fun checkFallDamage(y: Double, onGround: Boolean, state: BlockState, pos: BlockPos) {
-        this.doCheckFallDamage(0.0, y, 0.0, onGround)
-    }
-
     override fun readAdditionalSaveData(compound: CompoundTag) {
         super.readAdditionalSaveData(compound)
         if (compound.contains("fake_actions", Tag.TAG_COMPOUND)) {
@@ -73,12 +68,17 @@ class FakePlayer @Internal constructor(
         compound.put("fake_actions", this.actions.serialize())
     }
 
+    override fun isControlledByClient(): Boolean {
+        return false
+    }
+
     override fun die(source: DamageSource) {
         super.die(source)
     }
 
     override fun showEndCredits() {
-        this.seenCredits = true
+        this.wonGame = true
+        super.showEndCredits()
     }
 
     companion object {
