@@ -34,7 +34,7 @@ interface FakePlayerAction {
     fun provider(): FakePlayerActionProvider
 
     companion object {
-        val CODEC: Codec<FakePlayerAction> by lazy {
+        val CODEC: Codec<FakePlayerAction> = Codec.lazyInitialized {
             FakePlayerRegistries.ACTION_PROVIDERS.byNameCodec()
                 .dispatch(FakePlayerAction::provider, FakePlayerActionProvider::CODEC)
         }
@@ -47,6 +47,7 @@ interface FakePlayerAction {
             OffhandAction.register(registry)
             SwapSlotAction.register(registry)
             JumpAction.register(registry)
+            LookAction.register(registry)
         }
     }
 }
