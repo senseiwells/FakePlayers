@@ -7,21 +7,19 @@ parchment     = "1.21:2024.07.28"
 fabric-api    = "0.110.5+1.21.4"
 fabric-kotlin = "1.13.0+kotlin.2.1.0"
 permissions   = "0.3.4"
-arcade        = "0.4.0-alpha.7+1.21.4"
-mojank        = "1.0.2"
+arcade        = "0.4.0-beta.18+1.21.4"
 
 [libraries]
-minecraft             = { module = "com.mojang:minecraft"                          , version.ref = "minecraft" }
-fabric-loader         = { module = "net.fabricmc:fabric-loader"                    , version.ref = "fabric-loader" }
-fabric-api            = { module = "net.fabricmc.fabric-api:fabric-api"            , version.ref = "fabric-api" }
-fabric-kotlin         = { module = "net.fabricmc:fabric-language-kotlin"           , version.ref = "fabric-kotlin" }
-permissions           = { module = "me.lucko:fabric-permissions-api"               , version.ref = "permissions" }
-mojank                = { module = "me.senseiwells:mojank"                         , version.ref = "mojank" }
-arcade-commands       = { module = "net.casual-championships:arcade-commands"      , version.ref = "arcade" }
-arcade-event-registry = { module = "net.casual-championships:arcade-event-registry", version.ref = "arcade" }
-arcade-events-server  = { module = "net.casual-championships:arcade-events-server" , version.ref = "arcade" }
-arcade-scheduler      = { module = "net.casual-championships:arcade-scheduler"     , version.ref = "arcade" }
-arcade-utils          = { module = "net.casual-championships:arcade-utils"         , version.ref = "arcade" }
+minecraft             = { module = "com.mojang:minecraft"                         , version.ref = "minecraft" }
+fabric-loader         = { module = "net.fabricmc:fabric-loader"                   , version.ref = "fabric-loader" }
+fabric-api            = { module = "net.fabricmc.fabric-api:fabric-api"           , version.ref = "fabric-api" }
+fabric-kotlin         = { module = "net.fabricmc:fabric-language-kotlin"          , version.ref = "fabric-kotlin" }
+permissions           = { module = "me.lucko:fabric-permissions-api"              , version.ref = "permissions" }
+arcade-commands       = { module = "net.casualchampionships:arcade-commands"      , version.ref = "arcade" }
+arcade-event-registry = { module = "net.casualchampionships:arcade-event-registry", version.ref = "arcade" }
+arcade-events-server  = { module = "net.casualchampionships:arcade-events-server" , version.ref = "arcade" }
+arcade-scheduler      = { module = "net.casualchampionships:arcade-scheduler"     , version.ref = "arcade" }
+arcade-utils          = { module = "net.casualchampionships:arcade-utils"         , version.ref = "arcade" }
 
 [plugins]
 fabric-loom = { id = "fabric-loom", version.ref = "fabric-loom" }
