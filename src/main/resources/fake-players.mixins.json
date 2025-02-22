@@ -12,6 +12,7 @@
     "PlayerListMixin",
     "PlayerMixin",
     "ServerGamePacketListenerImplMixin",
+    "ServerLoginPacketListenerImplAccessor",
     "ServicesAccessor"
   ],
   "injectors": {

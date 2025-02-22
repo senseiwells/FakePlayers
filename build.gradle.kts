@@ -15,11 +15,12 @@ repositories {
     mavenLocal()
     maven("https://maven.parchmentmc.org/")
     maven("https://maven.supersanta.me/snapshots")
+    maven("https://api.modrinth.com/maven")
     mavenCentral()
 }
 
 
-val modVersion = "0.1.2"
+val modVersion = "0.1.3"
 val releaseVersion = "${modVersion}+mc${libs.versions.minecraft.get()}"
 version = releaseVersion
 group = "me.senseiwells"

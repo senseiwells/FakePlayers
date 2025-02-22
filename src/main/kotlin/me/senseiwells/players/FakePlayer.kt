@@ -5,6 +5,7 @@ import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap
 import me.senseiwells.players.action.FakePlayerActions
 import me.senseiwells.players.network.FakeConnection
 import me.senseiwells.players.network.FakeGamePacketListenerImpl
+import me.senseiwells.players.network.FakeLoginPacketListenerImpl
 import me.senseiwells.players.utils.ResolvableProfile
 import net.casual.arcade.utils.contains
 import net.minecraft.Util
@@ -84,19 +85,23 @@ class FakePlayer @Internal constructor(
     companion object {
         private val joining = Object2ObjectOpenHashMap<String, CompletableFuture<FakePlayer>>()
 
-        fun join(server: MinecraftServer, profile: GameProfile): FakePlayer {
-            if (server.playerList.getPlayer(profile.id) != null) {
-                throw IllegalArgumentException("Player with UUID ${profile.id} already exists")
-            }
-
-            val player = FakePlayer(server, server.overworld(), profile)
-            player.entityData.set(DATA_PLAYER_MODE_CUSTOMISATION, 0x7F)
+        fun join(server: MinecraftServer, profile: GameProfile): CompletableFuture<FakePlayer> {
             val connection = FakeConnection()
-            server.playerList.placeNewPlayer(
-                connection, player, CommonListenerCookie(profile, 0, player.clientInformation(), false)
-            )
-            server.connection.connections.add(connection)
-            return player
+            // We simulate the fake login packet listener for luckperms compatability
+            val login = FakeLoginPacketListenerImpl(server, connection, profile)
+            return login.handleQueries().thenApplyAsync({
+                if (server.playerList.getPlayer(profile.id) != null) {
+                    throw IllegalArgumentException("Player with UUID ${profile.id} already exists")
+                }
+
+                val player = FakePlayer(server, server.overworld(), profile)
+                player.entityData.set(DATA_PLAYER_MODE_CUSTOMISATION, 0x7F)
+                server.playerList.placeNewPlayer(
+                    connection, player, CommonListenerCookie(profile, 0, player.clientInformation(), false)
+                )
+                server.connection.connections.add(connection)
+                player
+            }, server)
         }
 
         fun join(server: MinecraftServer, username: String): CompletableFuture<FakePlayer> {
@@ -106,7 +111,7 @@ class FakePlayer @Internal constructor(
                     if (throwable != null) {
                         FakePlayers.logger.error("Fake player $username failed to join", throwable)
                     }
-                }, server).thenApply { resolved ->
+                }, server).thenCompose { resolved ->
                     val profile = if (resolved.id.get() == Util.NIL_UUID) {
                         GameProfile(UUIDUtil.createOfflinePlayerUUID(username), username)
                     } else {
@@ -118,7 +123,7 @@ class FakePlayer @Internal constructor(
         }
 
         fun join(server: MinecraftServer, uuid: UUID): CompletableFuture<FakePlayer> {
-            return ResolvableProfile(uuid).resolve().thenApplyAsync({ resolved ->
+            return ResolvableProfile(uuid).resolve().thenComposeAsync({ resolved ->
                 if (resolved.name.get().isEmpty()) {
                     throw IllegalStateException("Resolved name was empty")
                 }
