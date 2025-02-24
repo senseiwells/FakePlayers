@@ -19,6 +19,7 @@ import net.minecraft.nbt.ListTag
 import net.minecraft.nbt.NbtIo
 import net.minecraft.nbt.StringTag
 import net.minecraft.nbt.Tag
+import net.minecraft.network.chat.Component
 import net.minecraft.server.MinecraftServer
 import net.minecraft.world.level.storage.LevelResource
 import org.slf4j.Logger
@@ -57,6 +58,12 @@ object FakePlayers: ModInitializer {
         }
         GlobalEventHandler.Server.register<ServerStoppingEvent> { (server) ->
             this.saveFakePlayers(server)
+            // We dc fake players here because luckperms is silly
+            for (player in server.playerList.players) {
+                if (player is FakePlayer) {
+                    player.connection.disconnect(Component.empty())
+                }
+            }
         }
     }
 
