@@ -59,7 +59,7 @@ object FakePlayers: ModInitializer {
         GlobalEventHandler.Server.register<ServerStoppingEvent> { (server) ->
             this.saveFakePlayers(server)
             // We dc fake players here because luckperms is silly
-            for (player in server.playerList.players) {
+            for (player in server.playerList.players.toList()) {
                 if (player is FakePlayer) {
                     player.connection.disconnect(Component.empty())
                 }
