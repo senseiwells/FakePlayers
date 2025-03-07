@@ -57,6 +57,13 @@ class FakePlayer @Internal constructor(
         )
     }
 
+    override fun forceSetRotation(yRot: Float, xRot: Float) {
+        this.yRot = yRot
+        this.setYHeadRot(yRot)
+        this.xRot = xRot
+        this.setOldRot()
+    }
+
     override fun readAdditionalSaveData(compound: CompoundTag) {
         super.readAdditionalSaveData(compound)
         if (compound.contains("fake_actions", Tag.TAG_COMPOUND)) {
