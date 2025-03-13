@@ -13,6 +13,7 @@ import net.minecraft.core.UUIDUtil
 import net.minecraft.nbt.CompoundTag
 import net.minecraft.nbt.Tag
 import net.minecraft.network.protocol.game.ServerboundClientCommandPacket
+import net.minecraft.network.protocol.game.ServerboundPlayerLoadedPacket
 import net.minecraft.server.MinecraftServer
 import net.minecraft.server.TickTask
 import net.minecraft.server.level.ClientInformation
@@ -107,6 +108,7 @@ class FakePlayer @Internal constructor(
                     connection, player, CommonListenerCookie(profile, 0, player.clientInformation(), false)
                 )
                 server.connection.connections.add(connection)
+                player.connection.handleAcceptPlayerLoad(ServerboundPlayerLoadedPacket())
                 player
             }, server)
         }
