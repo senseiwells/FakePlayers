@@ -1,7 +1,7 @@
 package me.senseiwells.players.mixins;
 
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
-import me.senseiwells.players.network.FakeGamePacketListenerImpl;
+import me.senseiwells.players.network.ActionableFakeGamePacketListenerImpl;
 import net.minecraft.server.network.ServerGamePacketListenerImpl;
 import net.minecraft.world.InteractionResult;
 import org.spongepowered.asm.mixin.Mixin;
@@ -17,7 +17,7 @@ public class ServerGamePacketListenerImplMixin {
         )
     )
     private InteractionResult storeUseOnResultForFake(InteractionResult original) {
-        if ((Object) this instanceof FakeGamePacketListenerImpl fake) {
+        if ((Object) this instanceof ActionableFakeGamePacketListenerImpl fake) {
             fake.pushResult(original);
         }
         return original;
@@ -31,7 +31,7 @@ public class ServerGamePacketListenerImplMixin {
         )
     )
     private InteractionResult storeUseResultForFake(InteractionResult original) {
-        if ((Object) this instanceof FakeGamePacketListenerImpl fake) {
+        if ((Object) this instanceof ActionableFakeGamePacketListenerImpl fake) {
             fake.pushResult(original);
         }
         return original;

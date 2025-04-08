@@ -20,7 +20,7 @@ repositories {
 }
 
 
-val modVersion = "0.1.7"
+val modVersion = "0.2.0"
 val releaseVersion = "${modVersion}+mc${libs.versions.minecraft.get()}"
 version = releaseVersion
 group = "me.senseiwells"
@@ -42,6 +42,7 @@ dependencies {
     include(modImplementation(libs.arcade.event.registry.get())!!)
     include(modImplementation(libs.arcade.events.server.get())!!)
     include(modImplementation(libs.arcade.scheduler.get())!!)
+    include(modImplementation(libs.arcade.npcs.get())!!)
     include(modImplementation(libs.arcade.utils.get())!!)
 }
 

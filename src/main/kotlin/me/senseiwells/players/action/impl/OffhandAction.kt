@@ -4,7 +4,7 @@ import com.mojang.brigadier.Command
 import com.mojang.brigadier.builder.LiteralArgumentBuilder
 import com.mojang.brigadier.context.CommandContext
 import com.mojang.serialization.MapCodec
-import me.senseiwells.players.FakePlayer
+import me.senseiwells.players.ActionableFakePlayer
 import me.senseiwells.players.action.FakePlayerAction
 import me.senseiwells.players.action.FakePlayerActionProvider
 import net.minecraft.commands.CommandSourceStack
@@ -19,7 +19,7 @@ object OffhandAction: FakePlayerAction, FakePlayerActionProvider {
 
     override val CODEC: MapCodec<out OffhandAction> = MapCodec.unit(this)
 
-    override fun run(player: FakePlayer): Boolean {
+    override fun run(player: ActionableFakePlayer): Boolean {
         player.connection.handlePlayerAction(
             ServerboundPlayerActionPacket(Action.SWAP_ITEM_WITH_OFFHAND, BlockPos.ZERO, Direction.DOWN)
         )

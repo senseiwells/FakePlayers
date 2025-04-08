@@ -4,15 +4,10 @@
   "package": "me.senseiwells.players.mixins",
   "compatibilityLevel": "JAVA_17",
   "mixins": [
-    "ConnectionAccessor",
     "GameProfileCacheAccessor",
     "InteractionHandlerMixin",
     "MinecraftServerAccessor",
-    "PistonMovingBlockEntityMixin",
-    "PlayerListMixin",
-    "PlayerMixin",
     "ServerGamePacketListenerImplMixin",
-    "ServerLoginPacketListenerImplAccessor",
     "ServicesAccessor"
   ],
   "injectors": {

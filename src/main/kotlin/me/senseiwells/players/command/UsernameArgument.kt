@@ -5,7 +5,7 @@ import com.mojang.brigadier.context.CommandContext
 import com.mojang.brigadier.exceptions.DynamicCommandExceptionType
 import com.mojang.brigadier.suggestion.Suggestions
 import com.mojang.brigadier.suggestion.SuggestionsBuilder
-import me.senseiwells.players.FakePlayer
+import me.senseiwells.players.ActionableFakePlayer
 import net.casual.arcade.commands.type.CustomArgumentType
 import net.minecraft.commands.CommandSourceStack
 import net.minecraft.commands.SharedSuggestionProvider
@@ -45,7 +45,7 @@ class UsernameArgument: CustomArgumentType<String>() {
         fun suggestFakePlayers(context: CommandContext<*>, builder: SuggestionsBuilder): CompletableFuture<Suggestions> {
             val source = context.source
             if (source is CommandSourceStack) {
-                val names = source.server.playerList.players.filterIsInstance<FakePlayer>().map { it.scoreboardName }
+                val names = source.server.playerList.players.filterIsInstance<ActionableFakePlayer>().map { it.scoreboardName }
                 return SharedSuggestionProvider.suggest(names, builder)
             }
             return Suggestions.empty()

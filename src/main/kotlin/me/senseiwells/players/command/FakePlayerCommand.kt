@@ -5,12 +5,13 @@ import com.mojang.brigadier.arguments.BoolArgumentType
 import com.mojang.brigadier.builder.LiteralArgumentBuilder
 import com.mojang.brigadier.context.CommandContext
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType
-import me.senseiwells.players.FakePlayer
+import me.senseiwells.players.ActionableFakePlayer
 import me.senseiwells.players.FakePlayers
 import me.senseiwells.players.action.FakePlayerAction
 import me.senseiwells.players.action.FakePlayerActionProvider
 import me.senseiwells.players.utils.FakePlayerRegistries
 import net.casual.arcade.commands.*
+import net.casual.arcade.npc.FakePlayer
 import net.casual.arcade.scheduler.GlobalTickedScheduler
 import net.casual.arcade.utils.MathUtils.component1
 import net.casual.arcade.utils.MathUtils.component2
@@ -159,7 +160,7 @@ object FakePlayerCommand: CommandTree {
     private fun addFakePlayerOrThrow(
         context: CommandContext<CommandSourceStack>,
         username: String
-    ): CompletableFuture<FakePlayer> {
+    ): CompletableFuture<ActionableFakePlayer> {
         val server = context.source.server
         val existing = server.playerList.getPlayerByName(username)
         if (existing != null) {
@@ -168,7 +169,7 @@ object FakePlayerCommand: CommandTree {
         if (FakePlayer.isJoining(username)) {
             throw PLAYER_ALREADY_JOINING.create()
         }
-        return FakePlayer.join(context.source.server, username).whenComplete { _, throwable ->
+        return FakePlayer.join(context.source.server, username, ::ActionableFakePlayer).whenComplete { _, throwable ->
             if (throwable != null) {
                 context.source.fail("Fake player $username failed to join, see logs for more info")
                 FakePlayers.logger.error("Fake player $username failed to join", throwable)
@@ -231,16 +232,16 @@ object FakePlayerCommand: CommandTree {
         return context.source.success("Successfully stopped all actions")
     }
 
-    private fun getFakePlayerOrThrow(context: CommandContext<CommandSourceStack>): FakePlayer {
+    private fun getFakePlayerOrThrow(context: CommandContext<CommandSourceStack>): ActionableFakePlayer {
         val username = UsernameArgument.getUsername(context, "username")
         val player = context.source.server.playerList.getPlayerByName(username)
-        if (player !is FakePlayer) {
+        if (player !is ActionableFakePlayer) {
             throw FAKE_PLAYERS_ONLY.create()
         }
         return player
     }
 
-    private fun runActionRecursively(server: MinecraftServer, action: FakePlayerAction, player: FakePlayer) {
+    private fun runActionRecursively(server: MinecraftServer, action: FakePlayerAction, player: ActionableFakePlayer) {
         server.schedule(TickTask(server.tickCount) {
             if (!player.isRemoved) {
                 val result = action.run(player)

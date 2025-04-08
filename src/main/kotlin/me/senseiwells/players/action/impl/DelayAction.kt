@@ -7,7 +7,7 @@ import com.mojang.brigadier.context.CommandContext
 import com.mojang.serialization.Codec
 import com.mojang.serialization.MapCodec
 import com.mojang.serialization.codecs.RecordCodecBuilder
-import me.senseiwells.players.FakePlayer
+import me.senseiwells.players.ActionableFakePlayer
 import me.senseiwells.players.action.FakePlayerAction
 import me.senseiwells.players.action.FakePlayerActionProvider
 import net.casual.arcade.commands.argument
@@ -21,7 +21,7 @@ class DelayAction(
     private val delay: MinecraftTimeDuration,
     private var ticks: Int = 0
 ): FakePlayerAction {
-    override fun run(player: FakePlayer): Boolean {
+    override fun run(player: ActionableFakePlayer): Boolean {
         if (this.ticks++ >= this.delay.ticks) {
             this.ticks = 0
             return true

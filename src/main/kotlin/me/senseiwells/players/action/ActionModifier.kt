@@ -4,7 +4,7 @@ import com.mojang.serialization.Codec
 import net.minecraft.util.StringRepresentable
 
 enum class ActionModifier: StringRepresentable {
-    Click, Hold, Release;
+    Once, Hold, Release;
 
     override fun getSerializedName(): String {
         return this.name.lowercase()

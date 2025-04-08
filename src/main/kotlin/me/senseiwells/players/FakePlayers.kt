@@ -13,6 +13,7 @@ import net.casual.arcade.events.server.ServerLoadedEvent
 import net.casual.arcade.events.server.ServerRegisterCommandEvent
 import net.casual.arcade.events.server.ServerSaveEvent
 import net.casual.arcade.events.server.ServerStoppingEvent
+import net.casual.arcade.npc.FakePlayer
 import net.fabricmc.api.ModInitializer
 import net.minecraft.nbt.CompoundTag
 import net.minecraft.nbt.ListTag
@@ -47,6 +48,7 @@ object FakePlayers: ModInitializer {
             if (this.config.useMineToolsApi) {
                 val repository = MineToolsGameProfileRepository(Proxy.NO_PROXY)
                 val services = (server as MinecraftServerAccessor).services
+                @Suppress("CAST_NEVER_SUCCEEDS")
                 (services as ServicesAccessor).setProfileRepository(repository)
                 (services.profileCache as GameProfileCacheAccessor).setProfileRepository(repository)
             }
@@ -60,7 +62,7 @@ object FakePlayers: ModInitializer {
             this.saveFakePlayers(server)
             // We dc fake players here because luckperms is silly
             for (player in server.playerList.players.toList()) {
-                if (player is FakePlayer) {
+                if (player is ActionableFakePlayer) {
                     player.connection.disconnect(Component.empty())
                 }
             }
@@ -77,7 +79,7 @@ object FakePlayers: ModInitializer {
             val wrapper = NbtIo.read(path) ?: return
             val players = wrapper.getList("players", Tag.TAG_STRING.toInt())
             for (data in players) {
-                FakePlayer.join(server, UUID.fromString(data.asString))
+                FakePlayer.join(server, UUID.fromString(data.asString), ::ActionableFakePlayer)
             }
         } catch (e: Exception) {
             logger.error("Failed to load fake players", e)
@@ -87,7 +89,7 @@ object FakePlayers: ModInitializer {
     private fun saveFakePlayers(server: MinecraftServer) {
         val players = ListTag()
         for (player in server.playerList.players) {
-            if (player !is FakePlayer) {
+            if (player !is ActionableFakePlayer) {
                 continue
             }
             players.add(StringTag.valueOf(player.stringUUID))

@@ -1,7 +1,7 @@
 package me.senseiwells.players.action
 
 import com.mojang.serialization.Codec
-import me.senseiwells.players.FakePlayer
+import me.senseiwells.players.ActionableFakePlayer
 import me.senseiwells.players.action.FakePlayerActionProvider.Companion.register
 import me.senseiwells.players.action.impl.*
 import me.senseiwells.players.utils.FakePlayerRegistries
@@ -24,7 +24,7 @@ interface FakePlayerAction {
      * @param player The player doing the action.
      * @return Whether the action is finished.
      */
-    fun run(player: FakePlayer): Boolean
+    fun run(player: ActionableFakePlayer): Boolean
 
     /**
      * The provider for the given action.
@@ -41,13 +41,15 @@ interface FakePlayerAction {
 
         internal fun bootstrap(registry: Registry<FakePlayerActionProvider>) {
             AttackAction.register(registry)
-            UseAction.register(registry)
             DelayAction.register(registry)
             DropAction.register(registry)
-            OffhandAction.register(registry)
-            SwapSlotAction.register(registry)
             JumpAction.register(registry)
             LookAction.register(registry)
+            MoveToAction.register(registry)
+            OffhandAction.register(registry)
+            SprintAction.register(registry)
+            SwapSlotAction.register(registry)
+            UseAction.register(registry)
         }
     }
 }

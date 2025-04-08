@@ -7,7 +7,7 @@ import com.mojang.brigadier.context.CommandContext
 import com.mojang.serialization.Codec
 import com.mojang.serialization.MapCodec
 import com.mojang.serialization.codecs.RecordCodecBuilder
-import me.senseiwells.players.FakePlayer
+import me.senseiwells.players.ActionableFakePlayer
 import me.senseiwells.players.action.FakePlayerAction
 import me.senseiwells.players.action.FakePlayerActionProvider
 import net.casual.arcade.commands.argument
@@ -15,7 +15,7 @@ import net.minecraft.commands.CommandSourceStack
 import net.minecraft.resources.ResourceLocation
 
 class DropAction(private val dropEntireStack: Boolean = false): FakePlayerAction {
-    override fun run(player: FakePlayer): Boolean {
+    override fun run(player: ActionableFakePlayer): Boolean {
         if (!player.isSpectator) {
             player.drop(this.dropEntireStack)
         }

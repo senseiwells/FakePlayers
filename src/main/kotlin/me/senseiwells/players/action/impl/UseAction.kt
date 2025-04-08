@@ -5,7 +5,7 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder
 import com.mojang.brigadier.context.CommandContext
 import com.mojang.serialization.MapCodec
 import com.mojang.serialization.codecs.RecordCodecBuilder
-import me.senseiwells.players.FakePlayer
+import me.senseiwells.players.ActionableFakePlayer
 import me.senseiwells.players.action.ActionModifier
 import me.senseiwells.players.action.FakePlayerAction
 import me.senseiwells.players.action.FakePlayerActionProvider
@@ -15,13 +15,13 @@ import net.minecraft.commands.CommandSourceStack
 import net.minecraft.resources.ResourceLocation
 
 class UseAction(private val type: ActionModifier): FakePlayerAction {
-    override fun run(player: FakePlayer): Boolean {
+    override fun run(player: ActionableFakePlayer): Boolean {
         when (this.type) {
             ActionModifier.Hold -> {
                 player.actions.using = true
                 player.actions.usingHeld = true
             }
-            ActionModifier.Click -> {
+            ActionModifier.Once -> {
                 player.actions.using = true
             }
             ActionModifier.Release -> {

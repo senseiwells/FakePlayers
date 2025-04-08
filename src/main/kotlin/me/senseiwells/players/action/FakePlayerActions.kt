@@ -1,6 +1,6 @@
 package me.senseiwells.players.action
 
-import me.senseiwells.players.FakePlayer
+import me.senseiwells.players.ActionableFakePlayer
 import net.minecraft.core.BlockPos
 import net.minecraft.core.Direction
 import net.minecraft.nbt.CompoundTag
@@ -22,7 +22,7 @@ import kotlin.math.sqrt
 
 // Basically a copy of MultiPlayerGameMode to be run server-side
 class FakePlayerActions(
-    private val player: FakePlayer
+    private val player: ActionableFakePlayer
 ) {
     private val actions = ArrayList<FakePlayerAction>()
     private var action = 0
@@ -47,6 +47,8 @@ class FakePlayerActions(
 
     var using: Boolean = false
     var usingHeld: Boolean = false
+
+    var jumping: Boolean = false
 
     fun add(action: FakePlayerAction) {
         this.actions.add(action)
@@ -97,6 +99,10 @@ class FakePlayerActions(
         }
 
         this.continueAttack(!attacked && this.attackingHeld)
+
+        if (this.jumping) {
+            this.player.moveControl.jump()
+        }
     }
 
     private fun runActions() {
