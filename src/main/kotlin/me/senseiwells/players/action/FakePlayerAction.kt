@@ -12,6 +12,8 @@ import net.minecraft.core.Registry
  * run by a fake player.
  */
 interface FakePlayerAction {
+    val immediate: Boolean get() = false
+
     /**
      * This runs the action, this method will be called
      * every tick until the action has finished running.
@@ -43,6 +45,7 @@ interface FakePlayerAction {
             AttackAction.register(registry)
             DelayAction.register(registry)
             DropAction.register(registry)
+            InterruptMoveToAction.register(registry)
             JumpAction.register(registry)
             LookAction.register(registry)
             MoveToAction.register(registry)

@@ -24,6 +24,7 @@ import kotlin.math.sqrt
 class FakePlayerActions(
     private val player: ActionableFakePlayer
 ) {
+    private val chained = ArrayList<FakePlayerAction>()
     private val actions = ArrayList<FakePlayerAction>()
     private var action = 0
 
@@ -50,8 +51,21 @@ class FakePlayerActions(
 
     var jumping: Boolean = false
 
-    fun add(action: FakePlayerAction) {
-        this.actions.add(action)
+    fun run(action: FakePlayerAction) {
+        if (action.immediate) {
+            action.run(this.player)
+        } else {
+            this.actions.add(action)
+        }
+    }
+
+    fun chain(action: FakePlayerAction) {
+        this.chained.add(action)
+    }
+
+    fun remove(predicate: (FakePlayerAction) -> Boolean) {
+        this.actions.removeIf(predicate)
+        this.chained.removeIf(predicate)
     }
 
     fun restart() {
@@ -59,7 +73,7 @@ class FakePlayerActions(
     }
 
     fun clear() {
-        this.actions.clear()
+        this.chained.clear()
     }
 
     internal fun tick() {
@@ -106,17 +120,24 @@ class FakePlayerActions(
     }
 
     private fun runActions() {
-        if (this.loop && this.action >= this.actions.size) {
+        val iter = this.actions.iterator()
+        for (action in iter) {
+            if (action.run(this.player)) {
+                iter.remove()
+            }
+        }
+
+        if (this.loop && this.action >= this.chained.size) {
             this.action = 0
         }
         val start = this.action
         while (true) {
-            val action = this.actions.getOrNull(this.action) ?: break
+            val action = this.chained.getOrNull(this.action) ?: break
             if (!action.run(this.player)) {
                 break
             }
             this.action += 1
-            if (this.action >= this.actions.size) {
+            if (this.action >= this.chained.size) {
                 if (!this.loop) {
                     break
                 }
@@ -372,7 +393,7 @@ class FakePlayerActions(
         compound.putBoolean("using_held", this.usingHeld)
         compound.putBoolean("loop", this.loop)
         compound.putInt("action", this.action)
-        val result = FakePlayerAction.CODEC.listOf().encodeStart(NbtOps.INSTANCE, this.actions).result()
+        val result = FakePlayerAction.CODEC.listOf().encodeStart(NbtOps.INSTANCE, this.chained).result()
         if (result.isPresent) {
             compound.put("actions", result.get())
         }
@@ -388,8 +409,8 @@ class FakePlayerActions(
         this.action = compound.getInt("action")
         val result = FakePlayerAction.CODEC.listOf().parse(NbtOps.INSTANCE, compound.get("actions")).result()
         if (result.isPresent) {
-            this.actions.clear()
-            this.actions.addAll(result.get())
+            this.chained.clear()
+            this.chained.addAll(result.get())
         }
     }
 }

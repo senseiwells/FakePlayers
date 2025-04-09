@@ -7,16 +7,13 @@ import com.mojang.brigadier.context.CommandContext
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType
 import me.senseiwells.players.ActionableFakePlayer
 import me.senseiwells.players.FakePlayers
-import me.senseiwells.players.action.FakePlayerAction
 import me.senseiwells.players.action.FakePlayerActionProvider
 import me.senseiwells.players.utils.FakePlayerRegistries
 import net.casual.arcade.commands.*
 import net.casual.arcade.npc.FakePlayer
-import net.casual.arcade.scheduler.GlobalTickedScheduler
 import net.casual.arcade.utils.MathUtils.component1
 import net.casual.arcade.utils.MathUtils.component2
 import net.casual.arcade.utils.MathUtils.component3
-import net.casual.arcade.utils.TimeUtils.Ticks
 import net.minecraft.commands.CommandBuildContext
 import net.minecraft.commands.CommandSourceStack
 import net.minecraft.commands.arguments.DimensionArgument
@@ -24,8 +21,6 @@ import net.minecraft.commands.arguments.GameModeArgument
 import net.minecraft.commands.arguments.coordinates.Vec2Argument
 import net.minecraft.commands.arguments.coordinates.Vec3Argument
 import net.minecraft.network.chat.Component
-import net.minecraft.server.MinecraftServer
-import net.minecraft.server.TickTask
 import net.minecraft.server.level.ServerLevel
 import net.minecraft.world.level.GameType
 import net.minecraft.world.phys.Vec2
@@ -180,15 +175,14 @@ object FakePlayerCommand: CommandTree {
     private fun runAction(context: CommandContext<CommandSourceStack>, provider: FakePlayerActionProvider): Int {
         val player = this.getFakePlayerOrThrow(context)
         val action = provider.createCommandAction(context)
-        val server = context.source.server
-        runActionRecursively(server, action, player)
+        player.actions.run(action)
         return context.source.success("Successfully ran action '${provider.ID}'")
     }
 
     private fun addAction(context: CommandContext<CommandSourceStack>, provider: FakePlayerActionProvider): Int {
         val player = this.getFakePlayerOrThrow(context)
         val action = provider.createCommandAction(context)
-        player.actions.add(action)
+        player.actions.chain(action)
         return context.source.success("Successfully added '${provider.ID}' action")
     }
 
@@ -239,18 +233,5 @@ object FakePlayerCommand: CommandTree {
             throw FAKE_PLAYERS_ONLY.create()
         }
         return player
-    }
-
-    private fun runActionRecursively(server: MinecraftServer, action: FakePlayerAction, player: ActionableFakePlayer) {
-        server.schedule(TickTask(server.tickCount) {
-            if (!player.isRemoved) {
-                val result = action.run(player)
-                if (!result) {
-                    GlobalTickedScheduler.schedule(1.Ticks) {
-                        runActionRecursively(server, action, player)
-                    }
-                }
-            }
-        })
     }
 }
