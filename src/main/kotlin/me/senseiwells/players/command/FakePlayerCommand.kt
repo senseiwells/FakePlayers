@@ -1,10 +1,14 @@
 package me.senseiwells.players.command
 
 import com.mojang.brigadier.Command
+import com.mojang.brigadier.StringReader
 import com.mojang.brigadier.arguments.BoolArgumentType
+import com.mojang.brigadier.builder.ArgumentBuilder
 import com.mojang.brigadier.builder.LiteralArgumentBuilder
 import com.mojang.brigadier.context.CommandContext
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType
+import com.mojang.brigadier.suggestion.Suggestions
+import com.mojang.brigadier.suggestion.SuggestionsBuilder
 import me.senseiwells.players.ActionableFakePlayer
 import me.senseiwells.players.FakePlayers
 import me.senseiwells.players.action.FakePlayerActionProvider
@@ -16,10 +20,13 @@ import net.casual.arcade.utils.MathUtils.component2
 import net.casual.arcade.utils.MathUtils.component3
 import net.minecraft.commands.CommandBuildContext
 import net.minecraft.commands.CommandSourceStack
+import net.minecraft.commands.SharedSuggestionProvider
 import net.minecraft.commands.arguments.DimensionArgument
+import net.minecraft.commands.arguments.EntityArgument
 import net.minecraft.commands.arguments.GameModeArgument
 import net.minecraft.commands.arguments.coordinates.Vec2Argument
 import net.minecraft.commands.arguments.coordinates.Vec3Argument
+import net.minecraft.commands.arguments.selector.EntitySelectorParser
 import net.minecraft.network.chat.Component
 import net.minecraft.server.level.ServerLevel
 import net.minecraft.world.level.GameType
@@ -69,54 +76,79 @@ object FakePlayerCommand: CommandTree {
                         }
                     }
                 }
-                literal("leave") {
-                    executes(::fakePlayerLeave)
-                }
 
-                literal("actions") {
-                    literal("run") {
-                        for (provider in FakePlayerRegistries.ACTION_PROVIDERS) {
-                            if (provider.canRunAction) {
-                                literal(provider.ID.toString()) {
-                                    provider.addCommandArguments(this) { context ->
-                                        runAction(context, provider)
-                                    }
-                                }
+                addCommonCommandTree(this)
+            }
+            argument("player", EntityArgument.player()) {
+                suggests(::suggestFakePlayerNamesAndSelectors)
+                addCommonCommandTree(this)
+            }
+        }
+    }
+
+    private fun addCommonCommandTree(builder: ArgumentBuilder<CommandSourceStack, *>) {
+        builder.literal("leave") {
+            executes(::fakePlayerLeave)
+        }
+
+        builder.literal("actions") {
+            literal("run") {
+                for (provider in FakePlayerRegistries.ACTION_PROVIDERS) {
+                    if (provider.canRunAction) {
+                        literal(provider.ID.toString()) {
+                            provider.addCommandArguments(this) { context ->
+                                runAction(context, provider)
                             }
-                        }
-                    }
-                    literal("chain") {
-                        literal("add") {
-                            for (provider in FakePlayerRegistries.ACTION_PROVIDERS) {
-                                if (provider.canChainAction) {
-                                    literal(provider.ID.toString()) {
-                                        provider.addCommandArguments(this) { context ->
-                                            addAction(context, provider)
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                        literal("loop") {
-                            argument("loop", BoolArgumentType.bool()) {
-                                executes(::loopActions)
-                            }
-                        }
-                        literal("pause") {
-                            executes(::pauseActions)
-                        }
-                        literal("resume") {
-                            executes(::resumeActions)
-                        }
-                        literal("restart") {
-                            executes(::restartActions)
-                        }
-                        literal("stop") {
-                            executes(::stopActions)
                         }
                     }
                 }
             }
+            literal("chain") {
+                literal("add") {
+                    for (provider in FakePlayerRegistries.ACTION_PROVIDERS) {
+                        if (provider.canChainAction) {
+                            literal(provider.ID.toString()) {
+                                provider.addCommandArguments(this) { context ->
+                                    addAction(context, provider)
+                                }
+                            }
+                        }
+                    }
+                }
+                literal("loop") {
+                    argument("loop", BoolArgumentType.bool()) {
+                        executes(::loopActions)
+                    }
+                }
+                literal("pause") {
+                    executes(::pauseActions)
+                }
+                literal("resume") {
+                    executes(::resumeActions)
+                }
+                literal("restart") {
+                    executes(::restartActions)
+                }
+                literal("stop") {
+                    executes(::stopActions)
+                }
+            }
+        }
+    }
+
+    private fun suggestFakePlayerNamesAndSelectors(
+        context: CommandContext<CommandSourceStack>,
+        builder: SuggestionsBuilder
+    ): CompletableFuture<Suggestions> {
+        val reader = StringReader(builder.input)
+        reader.cursor = builder.start
+        val parser = EntitySelectorParser(reader, context.source.hasPermission(2))
+        runCatching(parser::parse)
+        return parser.fillSuggestions(builder) {
+            val names = context.source.server.playerList.players
+                .filterIsInstance<ActionableFakePlayer>()
+                .map { player -> player.scoreboardName }
+            SharedSuggestionProvider.suggest(names, it)
         }
     }
 
@@ -227,8 +259,12 @@ object FakePlayerCommand: CommandTree {
     }
 
     private fun getFakePlayerOrThrow(context: CommandContext<CommandSourceStack>): ActionableFakePlayer {
-        val username = UsernameArgument.getUsername(context, "username")
-        val player = context.source.server.playerList.getPlayerByName(username)
+        val player = if (context.hasArgument("username")) {
+            val username = UsernameArgument.getUsername(context, "username")
+            context.source.server.playerList.getPlayerByName(username)
+        } else {
+            EntityArgument.getPlayer(context, "player")
+        }
         if (player !is ActionableFakePlayer) {
             throw FAKE_PLAYERS_ONLY.create()
         }

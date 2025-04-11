@@ -3,15 +3,11 @@ package me.senseiwells.players.command
 import com.mojang.brigadier.StringReader
 import com.mojang.brigadier.context.CommandContext
 import com.mojang.brigadier.exceptions.DynamicCommandExceptionType
-import com.mojang.brigadier.suggestion.Suggestions
-import com.mojang.brigadier.suggestion.SuggestionsBuilder
-import me.senseiwells.players.ActionableFakePlayer
+import com.mojang.brigadier.suggestion.SuggestionProvider
 import net.casual.arcade.commands.type.CustomArgumentType
-import net.minecraft.commands.CommandSourceStack
 import net.minecraft.commands.SharedSuggestionProvider
 import net.minecraft.network.chat.Component
 import net.minecraft.util.StringUtil
-import java.util.concurrent.CompletableFuture
 
 class UsernameArgument: CustomArgumentType<String>() {
     override fun parse(reader: StringReader): String {
@@ -22,11 +18,8 @@ class UsernameArgument: CustomArgumentType<String>() {
         return name
     }
 
-    override fun <S> listSuggestions(
-        context: CommandContext<S>,
-        builder: SuggestionsBuilder
-    ): CompletableFuture<Suggestions> {
-        return suggestFakePlayers(context, builder)
+    override fun getSuggestionProvider(): SuggestionProvider<SharedSuggestionProvider>? {
+        return null
     }
 
     companion object {
@@ -40,15 +33,6 @@ class UsernameArgument: CustomArgumentType<String>() {
         @JvmStatic
         fun getUsername(context: CommandContext<*>, string: String): String {
             return context.getArgument(string, String::class.java)
-        }
-
-        fun suggestFakePlayers(context: CommandContext<*>, builder: SuggestionsBuilder): CompletableFuture<Suggestions> {
-            val source = context.source
-            if (source is CommandSourceStack) {
-                val names = source.server.playerList.players.filterIsInstance<ActionableFakePlayer>().map { it.scoreboardName }
-                return SharedSuggestionProvider.suggest(names, builder)
-            }
-            return Suggestions.empty()
         }
     }
 }
