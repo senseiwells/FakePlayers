@@ -5,15 +5,14 @@ import me.senseiwells.players.action.FakePlayerActions
 import me.senseiwells.players.network.ActionableFakeGamePacketListenerImpl
 import net.casual.arcade.npc.FakePlayer
 import net.casual.arcade.npc.network.FakeGamePacketListenerImpl
-import net.casual.arcade.utils.contains
 import net.minecraft.nbt.CompoundTag
-import net.minecraft.nbt.Tag
 import net.minecraft.network.Connection
 import net.minecraft.server.MinecraftServer
 import net.minecraft.server.TickTask
 import net.minecraft.server.level.ServerLevel
 import net.minecraft.server.network.CommonListenerCookie
 import org.jetbrains.annotations.ApiStatus.Internal
+import kotlin.jvm.optionals.getOrNull
 
 class ActionableFakePlayer @Internal constructor(
     server: MinecraftServer,
@@ -49,13 +48,14 @@ class ActionableFakePlayer @Internal constructor(
 
     override fun readAdditionalSaveData(compound: CompoundTag) {
         super.readAdditionalSaveData(compound)
-        if (compound.contains("fake_actions", Tag.TAG_COMPOUND)) {
-            this.actions.deserialize(compound.getCompound("fake_actions"))
+        val packed = compound.read("fake_actions", FakePlayerActions.Packed.CODEC).getOrNull()
+        if (packed != null) {
+            this.actions.unpack(packed)
         }
     }
 
     override fun addAdditionalSaveData(compound: CompoundTag) {
         super.addAdditionalSaveData(compound)
-        compound.put("fake_actions", this.actions.serialize())
+        compound.store("fake_actions", FakePlayerActions.Packed.CODEC, this.actions.pack())
     }
 }

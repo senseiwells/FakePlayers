@@ -15,11 +15,9 @@ import net.casual.arcade.events.server.ServerSaveEvent
 import net.casual.arcade.events.server.ServerStoppingEvent
 import net.casual.arcade.npc.FakePlayer
 import net.fabricmc.api.ModInitializer
+import net.minecraft.core.UUIDUtil
 import net.minecraft.nbt.CompoundTag
-import net.minecraft.nbt.ListTag
 import net.minecraft.nbt.NbtIo
-import net.minecraft.nbt.StringTag
-import net.minecraft.nbt.Tag
 import net.minecraft.network.chat.Component
 import net.minecraft.server.MinecraftServer
 import net.minecraft.world.level.storage.LevelResource
@@ -29,6 +27,7 @@ import java.net.Proxy
 import java.nio.file.Path
 import java.util.*
 import kotlin.io.path.exists
+import kotlin.jvm.optionals.getOrNull
 
 object FakePlayers: ModInitializer {
     const val MOD_ID = "fake-players"
@@ -77,9 +76,11 @@ object FakePlayers: ModInitializer {
 
         try {
             val wrapper = NbtIo.read(path) ?: return
-            val players = wrapper.getList("players", Tag.TAG_STRING.toInt())
-            for (data in players) {
-                FakePlayer.join(server, UUID.fromString(data.asString), ::ActionableFakePlayer)
+            val players = wrapper.read("players", UUIDUtil.STRING_CODEC.listOf()).getOrNull()
+            if (players != null) {
+                for (player in players) {
+                    FakePlayer.join(server, player, ::ActionableFakePlayer)
+                }
             }
         } catch (e: Exception) {
             logger.error("Failed to load fake players", e)
@@ -87,16 +88,16 @@ object FakePlayers: ModInitializer {
     }
 
     private fun saveFakePlayers(server: MinecraftServer) {
-        val players = ListTag()
+        val players = ArrayList<UUID>()
         for (player in server.playerList.players) {
             if (player !is ActionableFakePlayer) {
                 continue
             }
-            players.add(StringTag.valueOf(player.stringUUID))
+            players.add(player.uuid)
         }
 
         val wrapper = CompoundTag()
-        wrapper.put("players", players)
+        wrapper.store("players", UUIDUtil.STRING_CODEC.listOf(), players)
         try {
             NbtIo.write(wrapper, this.getFakePlayerDat(server))
         } catch (e: Exception) {

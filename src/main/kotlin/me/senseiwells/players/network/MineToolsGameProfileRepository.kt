@@ -7,6 +7,7 @@ import com.mojang.authlib.exceptions.MinecraftClientException
 import com.mojang.authlib.minecraft.client.MinecraftClient
 import java.net.Proxy
 import java.net.URI
+import java.util.*
 
 class MineToolsGameProfileRepository(proxy: Proxy): GameProfileRepository {
     private val client = MinecraftClient.unauthenticated(proxy)
@@ -31,6 +32,16 @@ class MineToolsGameProfileRepository(proxy: Proxy): GameProfileRepository {
                 callback.onProfileLookupFailed(name, e)
             }
         }
+    }
+
+    override fun findProfileByName(name: String): Optional<GameProfile> {
+        val url = URI("https://api.minetools.eu/uuid/${name}").toURL()
+        try {
+            return Optional.ofNullable(this.client.get(url, GameProfile::class.java))
+        } catch (_: MinecraftClientException) {
+
+        }
+        return Optional.empty()
     }
 
     companion object {

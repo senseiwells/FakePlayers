@@ -17,7 +17,7 @@ import net.minecraft.resources.ResourceLocation
 
 class SwapSlotAction(private val slot: Int): FakePlayerAction {
     override fun run(player: ActionableFakePlayer): Boolean {
-        player.inventory.selected = this.slot
+        player.inventory.selectedSlot = this.slot
         return true
     }
 

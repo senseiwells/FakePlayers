@@ -1,10 +1,10 @@
 package me.senseiwells.players.action
 
+import com.mojang.serialization.Codec
+import com.mojang.serialization.codecs.RecordCodecBuilder
 import me.senseiwells.players.ActionableFakePlayer
 import net.minecraft.core.BlockPos
 import net.minecraft.core.Direction
-import net.minecraft.nbt.CompoundTag
-import net.minecraft.nbt.NbtOps
 import net.minecraft.network.protocol.Packet
 import net.minecraft.network.protocol.game.*
 import net.minecraft.network.protocol.game.ServerboundPlayerActionPacket.Action
@@ -385,32 +385,49 @@ class FakePlayerActions(
         packet.handle(this.player.connection)
     }
 
-    internal fun serialize(): CompoundTag {
-        val compound = CompoundTag()
-        compound.putBoolean("attacking", this.attacking)
-        compound.putBoolean("using", this.using)
-        compound.putBoolean("attacking_held", this.attackingHeld)
-        compound.putBoolean("using_held", this.usingHeld)
-        compound.putBoolean("loop", this.loop)
-        compound.putInt("action", this.action)
-        val result = FakePlayerAction.CODEC.listOf().encodeStart(NbtOps.INSTANCE, this.chained).result()
-        if (result.isPresent) {
-            compound.put("actions", result.get())
-        }
-        return compound
+    internal fun pack(): Packed {
+        return Packed(
+            this.attacking,
+            this.using,
+            this.attackingHeld,
+            this.usingHeld,
+            this.loop,
+            this.action,
+            this.actions
+        )
     }
 
-    internal fun deserialize(compound: CompoundTag) {
-        this.attacking = compound.getBoolean("attacking")
-        this.using = compound.getBoolean("using")
-        this.attackingHeld = compound.getBoolean("attacking_held")
-        this.usingHeld = compound.getBoolean("using_held")
-        this.loop = compound.getBoolean("loop")
-        this.action = compound.getInt("action")
-        val result = FakePlayerAction.CODEC.listOf().parse(NbtOps.INSTANCE, compound.get("actions")).result()
-        if (result.isPresent) {
-            this.chained.clear()
-            this.chained.addAll(result.get())
+    internal fun unpack(packed: Packed) {
+        this.attacking = packed.attacking
+        this.using = packed.using
+        this.attackingHeld = packed.attackingHeld
+        this.usingHeld = packed.usingHeld
+        this.loop = packed.loop
+        this.action = packed.action
+        this.chained.addAll(packed.actions)
+    }
+
+    data class Packed(
+        val attacking: Boolean,
+        val using: Boolean,
+        val attackingHeld: Boolean,
+        val usingHeld: Boolean,
+        val loop: Boolean,
+        val action: Int,
+        val actions: List<FakePlayerAction>
+    ) {
+        companion object {
+            val CODEC: Codec<Packed> = RecordCodecBuilder.create { instance ->
+                instance.group(
+                    Codec.BOOL.fieldOf("attacking").forGetter(Packed::attacking),
+                    Codec.BOOL.fieldOf("using").forGetter(Packed::using),
+                    Codec.BOOL.fieldOf("attacking_held").forGetter(Packed::attackingHeld),
+                    Codec.BOOL.fieldOf("using_held").forGetter(Packed::usingHeld),
+                    Codec.BOOL.fieldOf("loop").forGetter(Packed::loop),
+                    Codec.INT.fieldOf("action").forGetter(Packed::action),
+                    FakePlayerAction.CODEC.listOf().optionalFieldOf("actions", listOf()).forGetter(Packed::actions)
+                ).apply(instance, ::Packed)
+            }
         }
     }
 }
