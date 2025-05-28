@@ -88,6 +88,13 @@ tasks {
             accessToken = providers.environmentVariable("MODRINTH_API_KEY")
             projectId = ""
             minecraftVersions.add(libs.versions.minecraft)
+
+            requires {
+                id = "P7dR8mSH"
+            }
+            requires {
+                id = "Ha28R6CL"
+            }
         }
     }
 }

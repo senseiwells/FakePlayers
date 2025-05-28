@@ -47,7 +47,7 @@ object PuppetPlayerCommand: CommandTree {
 
     override fun create(buildContext: CommandBuildContext): LiteralArgumentBuilder<CommandSourceStack> {
         return CommandTree.buildLiteral("puppet") {
-            requiresPermission(2)
+            requires { it.hasPermission(2) || !PuppetPlayers.config.operatorRequiredForPuppets }
 
             argument("username", UsernameArgument.username()) {
                 literal("join") {

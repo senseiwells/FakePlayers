@@ -5,7 +5,6 @@ import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.JsonNames
 import kotlinx.serialization.json.decodeFromStream
 import kotlinx.serialization.json.encodeToStream
 import net.fabricmc.loader.api.FabricLoader
@@ -22,6 +21,8 @@ import kotlin.io.path.outputStream
 class PuppetPlayerConfig(
     @SerialName("reload_puppet_players")
     val reloadPuppetPlayers: Boolean = true,
+    @SerialName("operator_required_for_puppets")
+    val operatorRequiredForPuppets: Boolean = true,
     @SerialName("use_mine_tools_api")
     @EncodeDefault(EncodeDefault.Mode.NEVER)
     val useMineToolsApi: Boolean = false
