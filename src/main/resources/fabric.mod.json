@@ -2,13 +2,13 @@
   "schemaVersion": 1,
   "id": "puppet-players",
   "version": "${version}",
-  "name": "Fake Players Mod",
+  "name": "Puppet Players",
   "description": "Modern implementation of the fake players implemented originally in Carpet Mod.",
   "authors": [
     "Sensei"
   ],
   "contact": {
-    "homepage": "https://github.com/senseiwells/FakePlayers"
+    "homepage": "https://github.com/senseiwells/PuppetPlayers"
   },
   "license": "MIT",
   "environment": "*",
