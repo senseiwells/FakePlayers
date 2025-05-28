@@ -17,11 +17,11 @@ import net.minecraft.resources.ResourceLocation
 import net.minecraft.world.phys.Vec2
 
 class LookAction(private val rotation: Vec2): FakePlayerAction {
-    override fun run(player: ActionableFakePlayer): Boolean {
+    override fun run(player: ActionableFakePlayer): FakePlayerAction.Result {
         player.connection.send(
             ServerboundMovePlayerPacket.Rot(this.rotation.y, this.rotation.x, player.onGround(), player.horizontalCollision)
         )
-        return true
+        return FakePlayerAction.Result.Complete
     }
 
     override fun provider(): FakePlayerActionProvider {

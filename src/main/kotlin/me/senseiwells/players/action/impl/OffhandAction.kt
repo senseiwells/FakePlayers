@@ -19,11 +19,11 @@ object OffhandAction: FakePlayerAction, FakePlayerActionProvider {
 
     override val CODEC: MapCodec<out OffhandAction> = MapCodec.unit(this)
 
-    override fun run(player: ActionableFakePlayer): Boolean {
+    override fun run(player: ActionableFakePlayer): FakePlayerAction.Result {
         player.connection.handlePlayerAction(
             ServerboundPlayerActionPacket(Action.SWAP_ITEM_WITH_OFFHAND, BlockPos.ZERO, Direction.DOWN)
         )
-        return true
+        return FakePlayerAction.Result.Complete
     }
 
     override fun provider(): FakePlayerActionProvider {

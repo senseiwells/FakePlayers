@@ -15,13 +15,13 @@ import net.minecraft.commands.CommandSourceStack
 import net.minecraft.resources.ResourceLocation
 
 class JumpAction(private val type: ActionModifier): FakePlayerAction {
-    override fun run(player: ActionableFakePlayer): Boolean {
+    override fun run(player: ActionableFakePlayer): FakePlayerAction.Result {
         when (this.type) {
             ActionModifier.Once -> player.moveControl.jump()
             ActionModifier.Hold -> player.actions.jumping = true
             ActionModifier.Release -> player.actions.jumping = false
         }
-        return true
+        return FakePlayerAction.Result.Complete
     }
 
     override fun provider(): FakePlayerActionProvider {

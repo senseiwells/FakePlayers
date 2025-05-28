@@ -21,12 +21,12 @@ class DelayAction(
     private val delay: MinecraftTimeDuration,
     private var ticks: Int = 0
 ): FakePlayerAction {
-    override fun run(player: ActionableFakePlayer): Boolean {
+    override fun run(player: ActionableFakePlayer): FakePlayerAction.Result {
         if (this.ticks++ >= this.delay.ticks) {
             this.ticks = 0
-            return true
+            return FakePlayerAction.Result.Complete
         }
-        return false
+        return FakePlayerAction.Result.Incomplete
     }
 
     override fun provider(): FakePlayerActionProvider {

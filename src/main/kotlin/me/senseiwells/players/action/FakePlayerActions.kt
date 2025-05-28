@@ -122,7 +122,7 @@ class FakePlayerActions(
     private fun runActions() {
         val iter = this.actions.iterator()
         for (action in iter) {
-            if (action.run(this.player)) {
+            if (action.run(this.player) == FakePlayerAction.Result.Complete) {
                 iter.remove()
             }
         }
@@ -133,7 +133,7 @@ class FakePlayerActions(
         val start = this.action
         while (true) {
             val action = this.chained.getOrNull(this.action) ?: break
-            if (!action.run(this.player)) {
+            if (action.run(this.player) == FakePlayerAction.Result.Incomplete) {
                 break
             }
             this.action += 1

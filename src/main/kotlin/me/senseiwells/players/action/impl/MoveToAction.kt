@@ -28,8 +28,8 @@ sealed class MoveToAction(
 ): FakePlayerAction {
     abstract fun getTarget(player: ActionableFakePlayer): Vec3?
 
-    override fun run(player: ActionableFakePlayer): Boolean {
-        val target = this.getTarget(player) ?: return true
+    override fun run(player: ActionableFakePlayer): FakePlayerAction.Result {
+        val target = this.getTarget(player) ?: return FakePlayerAction.Result.Complete
         val canNavigate = player.navigation.moveTo(target.x, target.y, target.z, 1.0)
         if (canNavigate) {
             if (this.sprint) {
@@ -38,9 +38,9 @@ sealed class MoveToAction(
             if (this.jump) {
                 player.moveControl.jump()
             }
-            return false
+            return FakePlayerAction.Result.Incomplete
         }
-        return true
+        return FakePlayerAction.Result.Complete
     }
 
     override fun provider(): FakePlayerActionProvider {

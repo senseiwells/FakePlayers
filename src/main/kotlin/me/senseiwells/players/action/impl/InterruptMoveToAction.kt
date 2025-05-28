@@ -17,10 +17,10 @@ object InterruptMoveToAction: FakePlayerAction, FakePlayerActionProvider {
 
     override val immediate: Boolean get() = true
 
-    override fun run(player: ActionableFakePlayer): Boolean {
+    override fun run(player: ActionableFakePlayer): FakePlayerAction.Result {
         player.actions.remove { it is MoveToAction }
         player.navigation.stop()
-        return true
+        return FakePlayerAction.Result.Complete
     }
 
     override fun provider(): FakePlayerActionProvider {

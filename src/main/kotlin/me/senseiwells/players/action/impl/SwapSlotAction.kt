@@ -16,9 +16,9 @@ import net.minecraft.commands.SharedSuggestionProvider
 import net.minecraft.resources.ResourceLocation
 
 class SwapSlotAction(private val slot: Int): FakePlayerAction {
-    override fun run(player: ActionableFakePlayer): Boolean {
+    override fun run(player: ActionableFakePlayer): FakePlayerAction.Result {
         player.inventory.selectedSlot = this.slot
-        return true
+        return FakePlayerAction.Result.Complete
     }
 
     override fun provider(): FakePlayerActionProvider {

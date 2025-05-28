@@ -15,9 +15,9 @@ import net.minecraft.commands.CommandSourceStack
 import net.minecraft.resources.ResourceLocation
 
 class SprintAction(private val sprinting: Boolean): FakePlayerAction {
-    override fun run(player: ActionableFakePlayer): Boolean {
+    override fun run(player: ActionableFakePlayer): FakePlayerAction.Result {
         player.moveControl.sprinting = this.sprinting
-        return true
+        return FakePlayerAction.Result.Complete
     }
 
     override fun provider(): FakePlayerActionProvider {

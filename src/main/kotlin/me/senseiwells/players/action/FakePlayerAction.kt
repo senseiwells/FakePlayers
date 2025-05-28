@@ -26,7 +26,7 @@ interface FakePlayerAction {
      * @param player The player doing the action.
      * @return Whether the action is finished.
      */
-    fun run(player: ActionableFakePlayer): Boolean
+    fun run(player: ActionableFakePlayer): Result
 
     /**
      * The provider for the given action.
@@ -34,6 +34,11 @@ interface FakePlayerAction {
      * @return The action provider.
      */
     fun provider(): FakePlayerActionProvider
+
+    enum class Result {
+        Incomplete,
+        Complete
+    }
 
     companion object {
         val CODEC: Codec<FakePlayerAction> = Codec.lazyInitialized {
@@ -50,6 +55,7 @@ interface FakePlayerAction {
             LookAction.register(registry)
             MoveToAction.register(registry)
             OffhandAction.register(registry)
+            SneakAction.register(registry)
             SprintAction.register(registry)
             SwapSlotAction.register(registry)
             UseAction.register(registry)

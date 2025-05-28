@@ -15,11 +15,11 @@ import net.minecraft.commands.CommandSourceStack
 import net.minecraft.resources.ResourceLocation
 
 class DropAction(private val dropEntireStack: Boolean = false): FakePlayerAction {
-    override fun run(player: ActionableFakePlayer): Boolean {
+    override fun run(player: ActionableFakePlayer): FakePlayerAction.Result {
         if (!player.isSpectator) {
             player.drop(this.dropEntireStack)
         }
-        return true
+        return FakePlayerAction.Result.Complete
     }
 
     override fun provider(): FakePlayerActionProvider {

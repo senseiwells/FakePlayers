@@ -15,7 +15,7 @@ import net.minecraft.commands.CommandSourceStack
 import net.minecraft.resources.ResourceLocation
 
 class UseAction(private val type: ActionModifier): FakePlayerAction {
-    override fun run(player: ActionableFakePlayer): Boolean {
+    override fun run(player: ActionableFakePlayer): FakePlayerAction.Result {
         when (this.type) {
             ActionModifier.Hold -> {
                 player.actions.using = true
@@ -28,7 +28,7 @@ class UseAction(private val type: ActionModifier): FakePlayerAction {
                 player.actions.usingHeld = false
             }
         }
-        return true
+        return FakePlayerAction.Result.Complete
     }
 
     override fun provider(): FakePlayerActionProvider {
