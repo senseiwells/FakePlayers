@@ -4,6 +4,7 @@
   "version": "${version}",
   "name": "Puppet Players",
   "description": "Modern implementation of the fake players implemented originally in Carpet Mod.",
+  "icon": "assets/puppet-players/icon.png",
   "authors": [
     "Sensei"
   ],
