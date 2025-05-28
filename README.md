@@ -46,7 +46,7 @@ as if the player were joining the server themselves.
 - The `spawn` subcommand spawns the specified puppet at either a specified position or the position of the
 command executor if the position is not specified.
 
-Once a player has joined the world we can make the player leave by running the following command:
+Once a player has joined the world, we can make the player leave by running the following command:
 ```
 /puppet <player> leave
 ```
@@ -89,7 +89,7 @@ We can also chain multiple actions together by running the following command:
 ```
 Once you've added actions to the chain, we can also run the following commands to
 control the chained behaviour:
-```
+```mcfunction
 /puppet <player> actions chain loop <true|false> # Whether to infinitely loop the chained actions
 /puppet <player> actions chain pause # Pause execution of the chained actions
 /puppet <player> actions chain resume # Resume execution of the chained actions
@@ -98,7 +98,7 @@ control the chained behaviour:
 ```
 
 For example, to make a player hold attack for 5 seconds, then let go for 2 seconds, then repeat we would run:
-```
+```mcfunction
 /puppet <player> actions chain add minecraft:attack hold
 /puppet <player> actions chain add minecraft:delay 5s
 /puppet <player> actions chain add minecraft:attack release
@@ -118,6 +118,24 @@ The config is located in `./config/puppet-player-config.json` and by default sho
 ```
 - `"reload_puppet_players"` - Whether to respawn puppets if the server stopped with them last online
 - `"operator_required_for_puppets"` - Whether players need operator permissions to run the `/puppet` command
+
+### Developers
+
+The puppet players mod is built on-top of [Arcade's NPC library](https://github.com/CasualChampionships/arcade).
+
+You can depend on puppet players and add more actions, read the documentation in `PuppetPlayerAction` and 
+`PuppetPlayerActionProvider` for more details!
+
+Add the following to your `build.gradle.kts`:
+```kts
+repositories {
+    maven("https://maven.supersanta.me/snapshots")
+}
+
+dependencies {
+    modImplementation("me.senseiwells:puppet-players:1.0.0+1.21.5")
+}
+```
 
 ## License
 

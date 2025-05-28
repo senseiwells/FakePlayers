@@ -28,11 +28,30 @@ interface PuppetPlayerActionProvider: CodecProvider<PuppetPlayerAction> {
     val canChainAction: Boolean
         get() = true
 
+    /**
+     * Adds arguments for that are required in [createCommandAction].
+     *
+     * @param builder The argument builder.
+     * @param command The command to run.
+     */
     fun addCommandArguments(builder: LiteralArgumentBuilder<CommandSourceStack>, command: Command<CommandSourceStack>)
 
+    /**
+     * Creates the action from the command context.
+     *
+     * Arguments added in [addCommandArguments] can be read here.
+     *
+     * @param context The command context.
+     * @return The created action.
+     */
     fun createCommandAction(context: CommandContext<CommandSourceStack>): PuppetPlayerAction
 
     companion object {
+        /**
+         * Registers an action provider to a registry.
+         *
+         * @param registry The registry to register to.
+         */
         fun PuppetPlayerActionProvider.register(registry: Registry<PuppetPlayerActionProvider>) {
             Registry.register(registry, this.ID, this)
         }

@@ -99,7 +99,42 @@ tasks {
     }
 }
 
-private fun DependencyHandler.includeModImplementation(provider: Provider<*>, action: Action<ExternalModuleDependency>) {
-    include(provider, action)
-    modImplementation(provider, action)
+publishing {
+    publications {
+        create<MavenPublication>("MavenJava") {
+            groupId = "me.senseiwells"
+            artifactId = "puppet-players"
+            version = "${modVersion}+${libs.versions.minecraft.get()}"
+            from(components["java"])
+
+            updateReadme("./README.md")
+        }
+    }
+
+    repositories {
+        val mavenUrl = System.getenv("MAVEN_URL")
+        if (mavenUrl != null) {
+            maven {
+                url = uri(mavenUrl)
+                val mavenUsername = System.getenv("MAVEN_USERNAME")
+                val mavenPassword = System.getenv("MAVEN_PASSWORD")
+                if (mavenUsername != null && mavenPassword != null) {
+                    credentials {
+                        username = mavenUsername
+                        password = mavenPassword
+                    }
+                }
+            }
+        }
+    }
+}
+
+private fun MavenPublication.updateReadme(vararg readmes: String) {
+    val location = "${groupId}:${artifactId}"
+    val regex = Regex("""${Regex.escape(location)}:[\d\.\-a-zA-Z+]+""")
+    val locationWithVersion = "${location}:${version}"
+    for (path in readmes) {
+        val readme = file(path)
+        readme.writeText(readme.readText().replace(regex, locationWithVersion))
+    }
 }

@@ -12,6 +12,10 @@ import net.minecraft.core.Registry
  * run by a fake player.
  */
 interface PuppetPlayerAction {
+    /**
+     * Whether the action will be run immediately or
+     * whether to schedule it in the action tick phase.
+     */
     val immediate: Boolean get() = false
 
     /**
