@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "id": "fake-players",
+  "id": "puppet-players",
   "version": "${version}",
   "name": "Fake Players Mod",
   "description": "Modern implementation of the fake players implemented originally in Carpet Mod.",
@@ -16,12 +16,12 @@
     "main": [
       {
         "adapter": "kotlin",
-        "value": "me.senseiwells.players.FakePlayers"
+        "value": "me.senseiwells.puppet.PuppetPlayers"
       }
     ]
   },
   "mixins": [
-    "fake-players.mixins.json"
+    "puppet-players.mixins.json"
   ],
   "depends": {
     "fabricloader": ">=0.14.12",

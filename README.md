@@ -1,4 +1,4 @@
-# FakePlayers
+# PuppetPlayers
 
 Modern, simple implementation of the fake players implemented originally in Carpet Mod.
 
@@ -16,4 +16,3 @@ possible to a real player:
 
 ## Usage
 
-## Developers

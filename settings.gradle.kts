@@ -1,4 +1,4 @@
-rootProject.name = "FakePlayers"
+rootProject.name = "PuppetPlayers"
 
 dependencyResolutionManagement {
     versionCatalogs {

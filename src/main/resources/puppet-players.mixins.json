@@ -1,0 +1,16 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "me.senseiwells.puppet.mixins",
+  "compatibilityLevel": "JAVA_17",
+  "mixins": [
+    "GameProfileCacheAccessor",
+    "InteractionHandlerMixin",
+    "MinecraftServerAccessor",
+    "ServerGamePacketListenerImplMixin",
+    "ServicesAccessor"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}
